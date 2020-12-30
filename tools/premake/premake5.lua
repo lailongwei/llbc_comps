@@ -40,13 +40,13 @@ workspace ("llbc_comps_" .. _ACTION)
         characterset "MBCS"
     filter {}
 	
-	-- enable cpp11/14/17/latest support
-	enable_cpp11_support()
-	-- enable_cpp14_support()
-	-- enable_cpp17_support()
+    -- enable cpp11/14/17/latest support
+    enable_cpp11_support()
+    -- enable_cpp14_support()
+    -- enable_cpp17_support()
 
     -- disable some warnings
-	disable_unimportant_warnings()
+    disable_unimportant_warnings()
 
 -- ****************************************************************************
 -- all component projects define.
