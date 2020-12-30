@@ -1,7 +1,7 @@
 -- @Author: Your name
 -- @Date:   2020-12-26 15:09:04
 -- @Last Modified by:   Your name
--- @Last Modified time: 2020-12-30 14:29:13
+-- @Last Modified time: 2020-12-30 15:02:14
 --  @file   premake5_com.lua
 --  @author Longwei Lai<lailongwei@126.com>
 --  @brief  The llbc components library premake script common variables&functions define.
@@ -59,10 +59,6 @@ function find_msbuild_path()
 	local msbuild_path = f:read("l")
     f:close()
     
-    local f = assert(io.popen(cmd))
-    prebuildmessage(f:read())
-    f:close()
-	
 	return msbuild_path
 end
 
@@ -159,22 +155,22 @@ function build_llbc_library()
 	filter {}
 	
 	local sln_name=string.format("llbc_%s.sln", _ACTION)
-	local msbuild_params = string.format("%s -target:llbc ", sln_name)
+	local msbuild_params_prefix = string.format("%s -target:llbc ", sln_name)
 	filter { "system:windows", "configurations:debug32" }
-		msbuild_params = msbuild_params .. "-property:Configuration=debug32 -property:Platform=x86"
-		prebuildcommands(string.format("cd \"%s\\..\\build\\%s\" & \"%s\" %s", llbc_dir, _ACTION, msbuild_path, msbuild_params))
+		local win_dbg32_msbuild_params = msbuild_params_prefix .. "-property:Configuration=debug32 -property:Platform=x86"
+		prebuildcommands(string.format("cd \"%s\\..\\build\\%s\" & \"%s\" %s", llbc_dir, _ACTION, msbuild_path, win_dbg32_msbuild_params))
 	filter {}
 	filter { "system:windows", "configurations:release32" }
-		msbuild_params = msbuild_params .. "-property:Configuration=release32 -property:Platform=x86"
-		prebuildcommands(string.format("cd \"%s\\..\\build\\%s\" & \"%s\" %s", llbc_dir, _ACTION, msbuild_path, msbuild_params))
+		local win_rel32_msbuild_params = msbuild_params_prefix .. "-property:Configuration=release32 -property:Platform=x86"
+		prebuildcommands(string.format("cd \"%s\\..\\build\\%s\" & \"%s\" %s", llbc_dir, _ACTION, msbuild_path, win_rel32_msbuild_params))
 	filter {}
 	filter { "system:windows", "configurations:debug64" }
-		msbuild_params = msbuild_params .. "-property:Configuration=debug64 -property:Platform=x64"
-		prebuildcommands(string.format("cd \"%s\\..\\build\\%s\" & \"%s\" %s", llbc_dir, _ACTION, msbuild_path, msbuild_params))
+		local win_dbg64_msbuild_params = msbuild_params_prefix .. "-property:Configuration=debug64 -property:Platform=x64"
+		prebuildcommands(string.format("cd \"%s\\..\\build\\%s\" & \"%s\" %s", llbc_dir, _ACTION, msbuild_path, win_dbg64_msbuild_params))
 	filter {}
 	filter { "system:windows", "configurations:release64" }
-		msbuild_params = msbuild_params .. "-property:Configuration=release64 -property:Platform=x64"
-		prebuildcommands(string.format("cd \"%s\\..\\build\\%s\" & \"%s\" %s", llbc_dir, _ACTION, msbuild_path, msbuild_params))
+		local win_rel64_msbuild_params = msbuild_params_prefix .. "-property:Configuration=release64 -property:Platform=x64"
+		prebuildcommands(string.format("cd \"%s\\..\\build\\%s\" & \"%s\" %s", llbc_dir, _ACTION, msbuild_path, win_rel64_msbuild_params))
 	filter {}
 	
 	-- non-windows platform build
@@ -305,9 +301,9 @@ function include_3rd_llbc(comp_name, add_files)
 		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc_debug.pdb\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION), "/", "\\"))
 	filter {}
 	filter { "system:windows", "configurations:release*" }
-		postbuildcommands(string.format("copy /Y \"%s/$(Configuration)/libllbc.dll\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION))
-		postbuildcommands(string.format("copy /Y \"%s/$(Configuration)/libllbc.lib\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION))
-		postbuildcommands(string.format("copy /Y \"%s/$(Configuration)/libllbc.pdb\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION))
+		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc.dll\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION), "/", "\\"))
+		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc.lib\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION), "/", "\\"))
+		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc.pdb\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION), "/", "\\"))
 	filter {}
 	
 	filter { "system:linux", "configurations:debug*" }
