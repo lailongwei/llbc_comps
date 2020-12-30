@@ -1,0 +1,3 @@
+[submodule "3rds/llbc"]
+	path = 3rds/llbc
+	url = https://github.com/lailongwei/llbc.git

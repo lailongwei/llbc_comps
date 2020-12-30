@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# solution files directory
+/build
+
+# component library files
+/comps/*/lib
