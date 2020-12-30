@@ -1,7 +1,7 @@
 -- @Author: Your name
 -- @Date:   2020-12-26 15:11:08
 -- @Last Modified by:   Your name
--- @Last Modified time: 2020-12-26 15:11:08
+-- @Last Modified time: 2020-12-30 14:48:56
 --  @file   premake5.lua
 --  @author Longwei Lai<lailongwei@126.com>
 --  @brief  The llbc components library premake script define.
@@ -39,7 +39,7 @@ workspace ("llbc_comps_" .. _ACTION)
     filter { "language:c++" }
         characterset "MBCS"
     filter {}
-	
+
     -- enable cpp11/14/17/latest support
     enable_cpp11_support()
     -- enable_cpp14_support()
