@@ -54,3 +54,7 @@ workspace ("llbc_comps_" .. _ACTION)
 -- component: example
 project "example"
     generate_comp_project("example")
+
+project "database"
+    generate_comp_project("database")
+    include_3rd_mysql("database")    
