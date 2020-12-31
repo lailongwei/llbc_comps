@@ -1,5 +1,4 @@
-#ifndef _DBMGR_FACTORY_H_
-#define _DBMGR_FACTORY_H_
+#pragma once
 
 #include "llbc/comm/IFacade.h"
 
@@ -11,4 +10,3 @@ public:
     virtual LLBC_IFacade *Create() const;
 };
 
-#endif // _DBMGR_FACTORY_H_

@@ -1,128 +1,107 @@
-#ifndef _IDB_H_
-#define _IDB_H_
+#pragma once
 
-#include <string>
 #include <functional>
+#include "llbc/common/StringDataType.h"
+
+using namespace llbc;
 
 enum class MODE
 {
     MODE_NONE,
-    MODE_READ,  //只读
-    MODE_EDIT   //读写
+    MODE_READ,  //read only
+    MODE_EDIT   //read and write
 };
 
+/**
+* Database single record object.
+*/
 class IRecord
 {
 public:
     virtual ~IRecord() = default;
 
-    /**
-     * 通过数据位置索引获取值
-     */
-    virtual int64_t GetInt(uint32_t idx) const = 0;
-    virtual double GetDouble(uint32_t idx) const = 0;
-    virtual const std::string &GetStr(uint32_t idx) const = 0;
-    /**
-     * 通过数据域名称获取值
-     */
-    virtual int64_t GetInt(const char *name) const = 0;
-    virtual double GetDouble(const char *name) const = 0;
-    virtual const std::string &GetStr(const char *name) const = 0;
+    virtual sint64 GetInt(uint32 idx) const = 0;
+    virtual double GetDouble(uint32 idx) const = 0;
+    virtual const LLBC_String &GetStr(uint32 idx) const = 0;
 
-    virtual void SetInt(uint32_t idx, int64_t val) = 0;
-    virtual void SetDouble(uint32_t idx, double val) = 0;
-    virtual void SetStr(uint32_t idx, const char *val) = 0;
-    virtual void SetBlob(uint32_t nIdx, const char *val, uint32_t len) = 0;
+    virtual sint64 GetInt(const LLBC_String& name) const = 0;
+    virtual double GetDouble(const LLBC_String& name) const = 0;
+    virtual const LLBC_String &GetStr(const LLBC_String& name) const = 0;
 
-    virtual void SetInt(const char *name, int64_t val) = 0;
-    virtual void SetDouble(const char *name, double val) = 0;
-    virtual void SetStr(const char *name, const char *val) = 0;
-    virtual void SetBlob(const char *name, const char *val, uint32_t len) = 0;
+public:
+    virtual void SetInt(uint32 idx, sint64 val) = 0;
+    virtual void SetDouble(uint32 idx, double val) = 0;
+    virtual void SetStr(uint32 idx, const char *val) = 0;
+    virtual void SetBlob(uint32 nIdx, const char *val, uint32 len) = 0;
+
+    virtual void SetInt(const LLBC_String& name, sint64 val) = 0;
+    virtual void SetDouble(const LLBC_String& name, double val) = 0;
+    virtual void SetStr(const LLBC_String& name, const char *val) = 0;
+    virtual void SetBlob(const LLBC_String& name, const char *val, uint32 len) = 0;
 };
 
 /**
- * 查询结果集合
+ * Database records set
  */
 class IRecordset
 {
 public:
     virtual ~IRecordset() = default;
 
-    //从集合充获取一条记录(集合仍然管理Record对象内存)
-    virtual IRecord *GetRecord(uint32_t idx) = 0;
+    // Get a record from set. (not release record)
+    virtual IRecord *GetRecord(uint32 idx) = 0;
 
-    //从集合从获取一条记录(集合不再管理Record对象内存)
-    virtual IRecord *PopRecord(uint32_t idx) = 0;
+    //Pop a record from set.(release record)
+    virtual IRecord *PopRecord(uint32 idx) = 0;
 
-    //获得集合记录数量
-    virtual uint32_t CountRecord() const = 0;
+    //Get record count.
+    virtual uint32 GetSize() const = 0;
 
-    virtual IRecord &operator[](uint32_t idx) = 0;
+    // Get a record ref.
+    virtual IRecord &operator[](uint32 idx) = 0;
 };
 
 /**
- * 异步执行sql回调
+ * async query callback.
  */
-using DBAsyncRecordCB = std::function<void(IRecord *)>;
-using DBAsyncRecordsetCB = std::function<void(IRecordset *)>;
-using DBAsyncSqlCB = std::function<void(bool)>;
+using AsyncQueryCB = std::function<void(IRecordset *)>;
+/**
+* async execute sql callback.
+*/
+using AsyncSqlCB = std::function<void(bool)>;
 
 /**
- * 数据库对象接口
+ * Database object.
  */
 class IDatabase
 {
 public:
     virtual ~IDatabase() = default;
 
-    // 初始化database
-    virtual bool Init(const std::string &ip, int port, const std::string &user, const std::string &passwd, const std::string &dbName,
+    // Init database.
+    virtual bool Init(const LLBC_String &ip, 
+                      int port, 
+                      const LLBC_String &user, 
+                      const LLBC_String &passwd, 
+                      const LLBC_String &dbName,
                       int asyncConnNum) = 0;
-    // 销毁数据库连接
+
+    // destroy database.
     virtual void Destroy() = 0;
 
-    // 等待所有连接刷新未处理的请求
+    // flush all async query.
     virtual void Flush() = 0;
 
-    // 定时调用，处理异步任务回调
-    virtual void OnUpdate() = 0;
-
 public:
-    // 同步查询单条记录
-    virtual IRecord *QueryRecord(const char *sql, MODE mode) = 0;
+    // synchronize query.
+    virtual IRecordset *Query(const char *sql, MODE mode) = 0;
 
-    // 同步查询多条记录
-    virtual IRecordset *QueryRecordset(const char *sql, MODE mode) = 0;
-
-    // 同步执行sql
+    // synchronize execute sql.
     virtual bool Query(const char *sql) = 0;
 
-public:
-    // 异步查询单条记录
-    virtual void QueryRecordAsync(uint64_t key, const char *sql, MODE mode, DBAsyncRecordCB cb) = 0;
+    // asynchronous query.
+    virtual void QueryAsync(uint64 key, const char *sql, MODE mode, AsyncQueryCB cb) = 0;
 
-    // 异步查询多条记录
-    virtual void QueryRecordsetAsync(uint64_t key, const char *sql, MODE mode, DBAsyncRecordsetCB cb) = 0;
-
-    // 异步执行sql
-    virtual void QueryAsync(uint64_t key, const char *sql, DBAsyncSqlCB cb) = 0;
-
-public:
-    // 同步创建指定表默认记录
-    virtual IRecord *MakeDefRecord(const char *tableName) = 0;
-
-    // 同步插入记录
-    virtual bool InsertRecord(IRecord *record) = 0;
-
-    // 同步更新记录
-    virtual bool UpdateRecord(IRecord *record) = 0;
-
-    // 同步删除记录
-    virtual bool DeleteRecord(IRecord *record) = 0;
+    // asynchronous execute sql.
+    virtual void QueryAsync(uint64 key, const char *sql, AsyncSqlCB cb) = 0;
 };
-
-extern "C"  IDatabase *CreateDB(const std::string &ip, int port, const std::string &user, const std::string &passwd,
-                                           const std::string &dbName,
-                                int asyncConnNum);
-
-#endif

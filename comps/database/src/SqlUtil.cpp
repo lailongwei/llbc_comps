@@ -14,7 +14,7 @@ const static int __DefaultNum2StrLen = 20;
 
 #define IS_FIELD_BLOB(x) ((x) == FIELD_TYPE_TINY_BLOB || (x) == FIELD_TYPE_MEDIUM_BLOB || (x) == FIELD_TYPE_LONG_BLOB || (x) == FIELD_TYPE_BLOB)
 
-bool SqlUtil::BuildCondition(MYSQL *handle, Record *record, std::string &cond)
+bool SqlUtil::BuildCondition(MYSQL *handle, Record *record, LLBC_String &cond)
 {
     int32_t keyIdx = record->GetAutoIncIdx();
     if (keyIdx < 0)
@@ -97,7 +97,7 @@ void SqlUtil::BuildFormatSql(MYSQL *handle, const BaseField *field, char *format
     case FIELD_TYPE_LONGLONG:
     {
         if ((field->GetAttr() & UNSIGNED_FLAG) != 0)
-            snprintf(format, formatSize, "`%s`=%llu", field->GetName(), uint64_t(field->GetInt()));
+            snprintf(format, formatSize, "`%s`=%llu", field->GetName(), uint64(field->GetInt()));
         else
             snprintf(format, formatSize, "`%s`=%lld", field->GetName(), field->GetInt());
     }
@@ -120,7 +120,7 @@ void SqlUtil::BuildFormatSql(MYSQL *handle, const BaseField *field, char *format
     }
 }
 
-bool SqlUtil::BuildOperation(MYSQL *handle, Record *record, std::string &cond)
+bool SqlUtil::BuildOperation(MYSQL *handle, Record *record, LLBC_String &cond)
 {
     int32_t keyIdx = record->GetAutoIncIdx();
     if (keyIdx < 0)
@@ -174,13 +174,13 @@ bool SqlUtil::BuildOperation(MYSQL *handle, Record *record, std::string &cond)
     return true;
 }
 
-bool SqlUtil::BuildUpdateSql(MYSQL *handle, Record *record, std::string &sql)
+bool SqlUtil::BuildUpdateSql(MYSQL *handle, Record *record, LLBC_String &sql)
 {
-    std::string cond;
+    LLBC_String cond;
     if (!BuildCondition(handle, record, cond))
         return false;
 
-    std::string op;
+    LLBC_String op;
     if (!BuildOperation(handle, record, op))
         return false;
 
@@ -198,9 +198,9 @@ bool SqlUtil::BuildUpdateSql(MYSQL *handle, Record *record, std::string &sql)
     return true;
 }
 
-bool SqlUtil::BuildDelSql(MYSQL *handle, Record *record, std::string &sql)
+bool SqlUtil::BuildDelSql(MYSQL *handle, Record *record, LLBC_String &sql)
 {
-    std::string cond;
+    LLBC_String cond;
     if (!BuildCondition(handle, record, cond))
         return false;
 
@@ -211,9 +211,9 @@ bool SqlUtil::BuildDelSql(MYSQL *handle, Record *record, std::string &sql)
     return true;
 }
 
-bool SqlUtil::BuildInsertSql(MYSQL *handle, Record *record, std::string &sql)
+bool SqlUtil::BuildInsertSql(MYSQL *handle, Record *record, LLBC_String &sql)
 {
-    std::string op;
+    LLBC_String op;
     if (!BuildOperation(handle, record, op))
         return false;
 

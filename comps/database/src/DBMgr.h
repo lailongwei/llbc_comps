@@ -1,8 +1,7 @@
-#ifndef _DB_MGR_H_
-#define _DB_MGR_H_
+#pragma once
 
 #include "IDBMgr.h"
-#include "IDB.h"
+#include "Database.h"
 #include <memory>
 #include <map>
 
@@ -26,8 +25,10 @@ public:
     virtual IDatabase *GetDefaultDatabase() override;
 
 private:
-    IDatabase* _defaultDB = nullptr;
-    std::map<LLBC_String, std::unique_ptr<IDatabase>> _databases;
-};
+    MysqlDB *CreateDatabase(const LLBC_String &ip, int port, const LLBC_String &user, const LLBC_String &passwd, const LLBC_String &dbName,
+                              int asyncConnNum);
 
-#endif  // _DB_MGR_H_
+private:
+    MysqlDB *_defaultDB = nullptr;
+    std::map<LLBC_String, std::unique_ptr<MysqlDB>> _databases;
+};

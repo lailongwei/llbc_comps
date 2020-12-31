@@ -1,5 +1,4 @@
-#ifndef _ASYNC_TASK_QUEUE_H_
-#define _ASYNC_TASK_QUEUE_H_
+#pragma once
 
 #include "AsyncTask.h"
 #include <mutex>
@@ -32,4 +31,3 @@ private:
     std::queue<AsyncTask *> _tasks;
 };
 
-#endif  // _ASYNC_TASK_QUEUE_H_

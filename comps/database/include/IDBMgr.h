@@ -1,5 +1,4 @@
-#ifndef _IDB_MGR_H_
-#define _IDB_MGR_H_
+#pragma once
 
 #include "IDB.h"
 #include "llbc/comm/IFacade.h"
@@ -21,4 +20,3 @@ public:
     virtual IDatabase *GetDefaultDatabase() = 0;
 };
 
-#endif // _IDB_MGR_H_

@@ -1,5 +1,4 @@
-#ifndef _MYSQL_CONNECT_H_
-#define _MYSQL_CONNECT_H_
+#pragma once
 
 #include <mysql_version.h>
 #include <mysql.h>
@@ -18,7 +17,7 @@ enum class MODE;
 class MysqlConnect
 {
 public:
-    MysqlConnect(MysqlDB &db, const std::string &ip, int port, const std::string &user, const std::string &passwd, const std::string &dbName);
+    MysqlConnect(MysqlDB &db, const LLBC_String &ip, int port, const LLBC_String &user, const LLBC_String &passwd, const LLBC_String &dbName);
     ~MysqlConnect();
 
 public:
@@ -27,45 +26,50 @@ public:
     bool IsConnect();
     void Disconnect();
 
+    //get mysql handler
     MYSQL *GetHandler();
-    uint32_t GetLastErrorNo();
-    const std::string GetLastError();
+
+    //get mysql last error.
+    uint32 GetLastErrorNo();
+    const LLBC_String GetLastError();
 
 public:
-    // 同步查询单条记录
-    IRecord *QueryRecord(const char *sql, MODE mode);
+    // synchronize query.
+    IRecordset *Query(const char *sql, MODE mode);
 
-    // 同步查询多条记录
-    IRecordset *QueryRecordset(const char *sql, MODE mode);
-
-    // 同步执行sql
+    // synchronize execute sql.
     bool Query(const char *sql);
 
-    // 创建指定表默认记录
+    // create a default record by tableName
     IRecord *MakeDefRecord(const char *tableName);
 
 private:  
-    // 同步执行sql并返回结果集
+    // synchronize query and get result
     bool Query(const char *sql, MYSQL_RES **res);
 
-    Record *CreateRecord(MYSQL_ROW row, MYSQL_FIELD *dbFields, const unsigned long *colLens, uint32_t fieldNum, MODE mode);
+    // create record from mysql table row.
+    Record *CreateRecord(MYSQL_ROW row, 
+                         MYSQL_FIELD *dbFields, 
+                         const unsigned long *colLens, 
+                         uint32 fieldNum, 
+                         MODE mode);
 
-    void SetError();
+    // set mysq last error.
+    void SetLastError();
 
 private:
     MysqlDB &_db;
 
-    std::string _ip;
+    LLBC_String _ip;
     int32_t _port;
-    std::string _user;
-    std::string _pwd;
-    std::string _dbName;
+    LLBC_String _user;
+    LLBC_String _pwd;
+    LLBC_String _dbName;
 
-    uint32_t _lastErrorCode;
-    std::string _lastError;
+    uint32 _lastErrorCode;
+    LLBC_String _lastError;
 
     bool _opened = false;
     MYSQL *_dbHandler = nullptr;
 };
 
-#endif

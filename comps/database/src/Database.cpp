@@ -18,7 +18,7 @@ MysqlDB::MysqlDB()
     , _flushing(false)
 {}
 
-bool MysqlDB::Init(const std::string &ip, int port, const std::string &user, const std::string &passwd, const std::string &dbName, int acyncConnNum)
+bool MysqlDB::Init(const LLBC_String &ip, int port, const LLBC_String &user, const LLBC_String &passwd, const LLBC_String &dbName, int acyncConnNum)
 {
     if (_inited)
         return false;
@@ -29,7 +29,7 @@ bool MysqlDB::Init(const std::string &ip, int port, const std::string &user, con
 
     _asyncConnNum = std::max<int>(acyncConnNum, 1);
 
-    for (uint32_t i = 0; i < _asyncConnNum; ++i)
+    for (uint32 i = 0; i < _asyncConnNum; ++i)
     {
         std::unique_ptr<MysqlConnect> conn = std::make_unique<MysqlConnect>(*this, ip, port, user, passwd, dbName);
         if (!conn->Connect())
@@ -42,7 +42,7 @@ bool MysqlDB::Init(const std::string &ip, int port, const std::string &user, con
     _taskQueues.reserve(_asyncConnNum);
     _asyncThreads.reserve(_asyncConnNum);
 
-    for (uint32_t i = 0; i < _asyncConnNum; ++i)
+    for (uint32 i = 0; i < _asyncConnNum; ++i)
     {
         _flushFlag.emplace_back(std::make_unique<std::atomic_bool>());
         _taskQueues.emplace_back(std::make_unique<AsyncTaskQueue>());
@@ -103,11 +103,11 @@ void MysqlDB::Flush()
     if (!_inited || _flushing)
         return;
 
-    for (uint32_t i = 0; i < _asyncConnNum; ++i) 
+    for (uint32 i = 0; i < _asyncConnNum; ++i) 
         *_flushFlag[i] = false;
 
     _flushing = true;
-    for (uint32_t i = 0; i < _asyncConnNum; ++i)
+    for (uint32 i = 0; i < _asyncConnNum; ++i)
     {
         auto& flushFlag = _flushFlag[i];
         while (!(*flushFlag)) 
@@ -142,16 +142,10 @@ void MysqlDB::OnUpdate()
     }
 }
 
-IRecord *MysqlDB::QueryRecord(const char *sql, MODE mode)
+IRecordset *MysqlDB::Query(const char *sql, MODE mode)
 {
     CHECK_ASYNC_THREAD
-    return _syncConn->QueryRecord(sql, mode);
-}
-
-IRecordset *MysqlDB::QueryRecordset(const char *sql, MODE mode)
-{
-    CHECK_ASYNC_THREAD
-    return _syncConn->QueryRecordset(sql, mode);
+    return _syncConn->Query(sql, mode);
 }
 
 bool MysqlDB::Query(const char *sql)
@@ -160,10 +154,10 @@ bool MysqlDB::Query(const char *sql)
     return _syncConn->Query(sql);
 }
 
-void MysqlDB::QueryRecordAsync(uint64_t key, const char *sql, MODE mode, DBAsyncRecordCB cb)
+void MysqlDB::QueryAsync(uint64 key, const char *sql, MODE mode, AsyncQueryCB cb)
 {
-    TaskQueryRecord *task = new TaskQueryRecord();
-    task->taskType = AsyncTaskType::QueryRecord;
+    TaskQuery *task = new TaskQuery();
+    task->taskType = AsyncTaskType::Query;
     task->sql = sql;
     task->task.mode = mode;
     task->task.cb = std::move(cb);
@@ -171,21 +165,10 @@ void MysqlDB::QueryRecordAsync(uint64_t key, const char *sql, MODE mode, DBAsync
     this->AddAsyncTask(key, task);
 }
 
-void MysqlDB::QueryRecordsetAsync(uint64_t key, const char *sql, MODE mode, DBAsyncRecordsetCB cb)
-{
-    TaskQueryRecordset *task = new TaskQueryRecordset();
-    task->taskType = AsyncTaskType::QueryRecordset;
-    task->sql = sql;
-    task->task.mode = mode;
-    task->task.cb = std::move(cb);
-
-    this->AddAsyncTask(key, task);
-}
-
-void MysqlDB::QueryAsync(uint64_t key, const char *sql, DBAsyncSqlCB cb)
+void MysqlDB::QueryAsync(uint64 key, const char *sql, AsyncSqlCB cb)
 {
     TaskQuerySql *task = new TaskQuerySql();
-    task->taskType = AsyncTaskType::QuerySql;
+    task->taskType = AsyncTaskType::ExecuteSql;
     task->sql = sql;
     task->task.cb = std::move(cb);
 
@@ -201,7 +184,7 @@ const DBFieldInfo *MysqlDB::QueryDBFieldInfo(const MYSQL_FIELD &field)
     snprintf(key, sizeof(key) - 1, "%s.%s", field.org_table, field.org_name);
     strlwr(key);
 
-    std::string findKey(key);
+    LLBC_String findKey(key);
 
     std::lock_guard<std::mutex> l(_fieldLock);
     auto it = _fieldInfos.find(findKey);
@@ -219,30 +202,25 @@ const DBFieldInfo *MysqlDB::QueryDBFieldInfo(const MYSQL_FIELD &field)
 
 IRecord *MysqlDB::MakeDefRecord(const char *tableName)
 {
-    CHECK_ASYNC_THREAD
     return _syncConn->MakeDefRecord(tableName);
 }
 
-bool MysqlDB::InsertRecord(IRecord *record)
+bool MysqlDB::Insert(IRecord *record)
 {
-    CHECK_ASYNC_THREAD
-
-    std::string sql;
+    LLBC_String sql;
     if (!SqlUtil::BuildInsertSql(_syncConn->GetHandler(), (Record *) record, sql))
         return false;
 
     return _syncConn->Query(sql.c_str());
 }
 
-bool MysqlDB::UpdateRecord(IRecord *record)
+bool MysqlDB::Update(IRecord *record)
 {
-    CHECK_ASYNC_THREAD
-
     auto updateRec = (Record *) record;
     if (updateRec->GetMode() != MODE::MODE_EDIT)
         return false;
 
-    std::string sql;
+    LLBC_String sql;
     if (!SqlUtil::BuildUpdateSql(_syncConn->GetHandler(), updateRec, sql))
         return false;
 
@@ -252,42 +230,32 @@ bool MysqlDB::UpdateRecord(IRecord *record)
 
     bool ret = _syncConn->Query(sql.c_str());
     if (ret)
-    {
         updateRec->ClsEditFlag();
-    }
 
     return ret;
 }
 
-bool MysqlDB::DeleteRecord(IRecord *record)
+bool MysqlDB::Delete(IRecord *record)
 {
-    CHECK_ASYNC_THREAD
-
     auto delRec = (Record *) record;
     if (delRec->GetMode() != MODE::MODE_EDIT)
         return false;
 
-    std::string sql;
+    LLBC_String sql;
     if (!SqlUtil::BuildDelSql(_syncConn->GetHandler(), delRec, sql))
         return false;
 
-    bool ret = _syncConn->Query(sql.c_str());
-    if (ret)
-    {
-        delRec->ClsEditFlag();
-    }
-
-    return ret;
+    return _syncConn->Query(sql.c_str());
 }
 
-void MysqlDB::AddAsyncTask(uint64_t key, AsyncTask *task)
+void MysqlDB::AddAsyncTask(uint64 key, AsyncTask *task)
 {
     CHECK_ASYNC_THREAD
     auto &taskQueue = _taskQueues[key % _asyncConnNum];
     taskQueue->Push(task);
 }
 
-void MysqlDB::AsyncWorkFunc(uint32_t threadIdx)
+void MysqlDB::AsyncWorkFunc(uint32 threadIdx)
 {
     MysqlConnect *conn = _asyncConns[threadIdx].get();
     auto &taskQueue = _taskQueues[threadIdx];
@@ -317,19 +285,13 @@ void MysqlDB::AsyncDoWork(MysqlConnect *conn, AsyncTask *task)
 {
     switch (task->taskType)
     {
-    case AsyncTaskType::QueryRecord:
+    case AsyncTaskType::Query:
     {
-        TaskQueryRecord *t = dynamic_cast<TaskQueryRecord *>(task);
-        t->task.result = conn->QueryRecord(task->sql.c_str(), t->task.mode);
+        TaskQuery *t = dynamic_cast<TaskQuery *>(task);
+        t->task.result = conn->Query(task->sql.c_str(), t->task.mode);
     }
     break;
-    case AsyncTaskType::QueryRecordset:
-    {
-        TaskQueryRecordset *t = dynamic_cast<TaskQueryRecordset *>(task);
-        t->task.result = conn->QueryRecordset(task->sql.c_str(), t->task.mode);
-    }
-    break;
-    case AsyncTaskType::QuerySql:
+    case AsyncTaskType::ExecuteSql:
     {
         TaskQuerySql *t = dynamic_cast<TaskQuerySql *>(task);
         t->task.result = conn->Query(task->sql.c_str());
@@ -341,15 +303,4 @@ void MysqlDB::AsyncDoWork(MysqlConnect *conn, AsyncTask *task)
     _finishLock.lock();
     _finishTasks.push(task);
     _finishLock.unlock();
-}
-
-IDatabase* CreateDB(const std::string& ip, int port, const std::string& user, const std::string& passwd, const std::string& dbName, int asyncConnNum)
-{
-    MysqlDB *db = new MysqlDB();
-    if (!db->Init(ip, port, user, passwd, dbName, asyncConnNum))
-    {
-        delete db;
-        return nullptr;
-    }
-    return db;
 }

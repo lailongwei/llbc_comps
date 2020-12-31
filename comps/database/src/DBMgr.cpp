@@ -10,7 +10,7 @@ bool DBMgr::OnInitialize()
     const char *pwd = "llbc123456";
     const char *db = "llbc";
 
-    _defaultDB = CreateDB(ip, port, name, pwd, db, 1);
+    _defaultDB = CreateDatabase(ip, port, name, pwd, db, 1);
     _databases["llbc"].reset(_defaultDB);
     
     return true;
@@ -54,4 +54,16 @@ IDatabase *DBMgr::GetDatabase(const LLBC_String &dbConnName)
 IDatabase *DBMgr::GetDefaultDatabase()
 {
     return _defaultDB;
+}
+
+MysqlDB *DBMgr::CreateDatabase(const LLBC_String &ip, int port, const LLBC_String &user, const LLBC_String &passwd, const LLBC_String &dbName,
+                          int asyncConnNum)
+{
+    MysqlDB *db = new MysqlDB();
+    if (!db->Init(ip, port, user, passwd, dbName, asyncConnNum))
+    {
+        delete db;
+        return nullptr;
+    }
+    return db;
 }

@@ -1,5 +1,4 @@
-#ifndef _Database_H_
-#define _Database_H_
+#pragma once
 
 #include <mysql_version.h>
 #include "mysql.h"
@@ -8,81 +7,77 @@
 #include <map>
 #include <memory>
 
-#include "IDB.h"
 #include "AsyncTask.h"
 #include "AsyncTaskQueue.h"
 
 class MysqlConnect;
 struct DBFieldInfo;
 
-
 class MysqlDB : public IDatabase
 {
 public:
     MysqlDB();
 
-    // 初始化database
-    virtual bool Init(const std::string &ip, int port, const std::string &user, const std::string &passwd, const std::string &dbName,
-                      int acyncConnNum) override;
-    // 销毁数据库连接
+   // Init database.
+    virtual bool Init(const LLBC_String &ip, 
+                      int port, 
+                      const LLBC_String &user, 
+                      const LLBC_String &passwd, 
+                      const LLBC_String &dbName,
+                      int asyncConnNum) override;
+
+    // destroy database.
     virtual void Destroy() override;
 
-    // 等待所有连接刷新未处理的请求
+    // flush all async query.
     virtual void Flush() override;
 
     // 定时调用，处理异步任务回调
-    virtual void OnUpdate() override;
+    void OnUpdate();
 
 public:
-    // 同步查询单条记录
-    virtual IRecord *QueryRecord(const char *sql, MODE mode) override;
+    // synchronize query.
+    virtual IRecordset *Query(const char *sql, MODE mode) override;
 
-    // 同步查询多条记录
-    virtual IRecordset *QueryRecordset(const char *sql, MODE mode) override;
-
-    // 同步执行sql
+    // synchronize execute sql.
     virtual bool Query(const char *sql) override;
 
+    // asynchronous query.
+    virtual void QueryAsync(uint64 key, const char *sql, MODE mode, AsyncQueryCB cb) override;
+
+    // asynchronous execute sql.
+    virtual void QueryAsync(uint64 key, const char *sql, AsyncSqlCB cb) override;
+
+ public:
+    IRecord *MakeDefRecord(const char *tableName);
+
+    // sync insert record.
+    bool Insert(IRecord *record);
+
+    // sync update record.
+    bool Update(IRecord *record);
+
+    // sync delete record.
+    bool Delete(IRecord *record);
+
 public:
-    // 异步查询单条记录
-    virtual void QueryRecordAsync(uint64_t key, const char *sql, MODE mode, DBAsyncRecordCB cb) override;
-
-    // 异步查询多条记录
-    virtual void QueryRecordsetAsync(uint64_t key, const char *sql, MODE mode, DBAsyncRecordsetCB cb) override;
-
-    // 异步执行sql
-    virtual void QueryAsync(uint64_t key, const char *sql, DBAsyncSqlCB cb) override;
-
-public:
-    //保存域信息
+    // save mysql field info.
     const DBFieldInfo *QueryDBFieldInfo(const MYSQL_FIELD &field);
 
-    // 同步创建指定表默认记录
-    virtual IRecord *MakeDefRecord(const char *tableName) override;
-
-    // 同步插入记录
-    virtual bool InsertRecord(IRecord *record) override;
-
-    // 同步更新记录
-    virtual bool UpdateRecord(IRecord *record) override;
-
-    // 同步删除记录
-    virtual bool DeleteRecord(IRecord *record) override;
-
 private:
-    // 添加异步任务
-    void AddAsyncTask(uint64_t key, AsyncTask *task);
+    // add async task to queue.
+    void AddAsyncTask(uint64 key, AsyncTask *task);
 
-    // 异步线程函数
-    void AsyncWorkFunc(uint32_t threadIdx);
+    // async work function.
+    void AsyncWorkFunc(uint32 threadIdx);
 
-    // 执行异步任务
+    // do async work.
     void AsyncDoWork(MysqlConnect *conn, AsyncTask *task);
 
 private:
     bool _inited;
     std::thread::id _asyncThreadId;
-    uint32_t _asyncConnNum;
+    uint32 _asyncConnNum;
     
     std::atomic_bool _stoping; //结束标记
     std::atomic_bool _flushing; //刷新标记
@@ -98,7 +93,6 @@ private:
     std::queue<AsyncTask *> _finishTasks;
 
     std::mutex _fieldLock;
-    std::map<std::string, DBFieldInfo *> _fieldInfos;
+    std::map<LLBC_String, DBFieldInfo *> _fieldInfos;
 };
 
-#endif  // !_Database_H_

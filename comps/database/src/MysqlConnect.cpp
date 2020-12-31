@@ -6,8 +6,12 @@
 
 #include "llbc/core/thread/Guard.h"
 
-MysqlConnect::MysqlConnect(MysqlDB &db, const std::string &ip, int port, const std::string &user, const std::string &passwd,
-                           const std::string &dbName)
+MysqlConnect::MysqlConnect(MysqlDB &db, 
+                           const LLBC_String &ip, 
+                           int port, 
+                           const LLBC_String &user, 
+                           const LLBC_String &passwd,
+                           const LLBC_String &dbName)
     : _db(db)
     , _ip(ip)
     , _port(port)
@@ -30,7 +34,7 @@ bool MysqlConnect::Connect()
 
     if (!mysql_real_connect(hdbc, _ip.c_str(), _user.c_str(), _pwd.c_str(), _dbName.c_str(), _port, nullptr, 0))
     {
-        this->SetError();
+        this->SetLastError();
         mysql_close(hdbc);
         return false;
     }
@@ -74,21 +78,25 @@ MYSQL *MysqlConnect::GetHandler()
     return _dbHandler;
 }
 
-uint32_t MysqlConnect::GetLastErrorNo()
+uint32 MysqlConnect::GetLastErrorNo()
 {
     return _lastErrorCode;
 }
 
-const std::string MysqlConnect::GetLastError()
+const LLBC_String MysqlConnect::GetLastError()
 {
     return _lastError;
 }
 
-Record *MysqlConnect::CreateRecord(MYSQL_ROW row, MYSQL_FIELD *dbFields, const unsigned long *colLens, uint32_t fieldNum, MODE mode)
+Record *MysqlConnect::CreateRecord(MYSQL_ROW row, 
+                                   MYSQL_FIELD *dbFields, 
+                                   const unsigned long *colLens, 
+                                   uint32 fieldNum, 
+                                   MODE mode)
 {
-    std::unique_ptr<Record> newRec(new Record(fieldNum, std::string(dbFields[0].org_table), mode));
+    std::unique_ptr<Record> newRec(new Record(fieldNum, LLBC_String(dbFields[0].org_table), mode));
 
-    for (uint32_t i = 0; i < fieldNum; i++)
+    for (uint32 i = 0; i < fieldNum; i++)
     {
         const MYSQL_FIELD &dbField = dbFields[i];
         const DBFieldInfo *fieldInfo = _db.QueryDBFieldInfo(dbField);
@@ -113,38 +121,8 @@ Record *MysqlConnect::CreateRecord(MYSQL_ROW row, MYSQL_FIELD *dbFields, const u
     return newRec.release();
 }
 
-// 同步查询单条记录
-IRecord *MysqlConnect::QueryRecord(const char *sql, MODE mode)
-{
-    MYSQL_RES *res = nullptr;
-    if (!Query(sql, &res))
-        return nullptr;
-
-    if (!res)
-        return nullptr;
-
-    //函数结束自动释放MYSQL_RES
-    std::shared_ptr<void> _resGuard((void *) 0, [res](void *) { mysql_free_result(res); });
-    // 取第1个记录
-    mysql_data_seek(res, 0);
-    MYSQL_ROW row = mysql_fetch_row(res);
-
-    if (!row)
-        return nullptr;
-
-    // 取字段信息
-    MYSQL_FIELD *dbFields = mysql_fetch_fields(res);
-    if (!dbFields)
-        return nullptr;
-
-    const unsigned long *colLens = mysql_fetch_lengths(res);
-    const uint32_t fieldNum = mysql_num_fields(res);
-
-    return CreateRecord(row, dbFields, colLens, fieldNum, mode);
-}
-
 // 同步查询多条记录
-IRecordset *MysqlConnect::QueryRecordset(const char *sql, MODE mode)
+IRecordset *MysqlConnect::Query(const char *sql, MODE mode)
 {
     MYSQL_RES *res = nullptr;
     if (!Query(sql, &res))
@@ -163,12 +141,12 @@ IRecordset *MysqlConnect::QueryRecordset(const char *sql, MODE mode)
         return nullptr;
 
     const unsigned long *colLens = mysql_fetch_lengths(res);
-    const uint32_t fieldNum = mysql_num_fields(res);
+    const uint32 fieldNum = mysql_num_fields(res);
 
-    std::unique_ptr<Recordset> recSet = std::make_unique<Recordset>(static_cast<uint32_t>(mysql_num_rows(res)));
+    std::unique_ptr<Recordset> recSet = std::make_unique<Recordset>(static_cast<uint32>(mysql_num_rows(res)));
 
     MYSQL_ROW row;
-    uint32_t idx = 0;
+    uint32 idx = 0;
     while (row = mysql_fetch_row(res))
     {
         Record *newRec = CreateRecord(row, dbFields, colLens, fieldNum, mode);
@@ -178,7 +156,7 @@ IRecordset *MysqlConnect::QueryRecordset(const char *sql, MODE mode)
         recSet->WriteRecord(idx++, newRec);
     }
 
-    assert(idx == recSet->CountRecord());
+    assert(idx == recSet->GetSize());
     return recSet.release();
 }
 
@@ -188,7 +166,7 @@ bool MysqlConnect::Query(const char *sql)
     return Query(sql, nullptr);
 }
 
-void MysqlConnect::SetError()
+void MysqlConnect::SetLastError()
 {
     _lastErrorCode = mysql_errno(_dbHandler);
     _lastError = mysql_error(_dbHandler);
@@ -204,7 +182,7 @@ bool MysqlConnect::Query(const char *sql, MYSQL_RES **res)
         int ret = mysql_real_query(_dbHandler, sql, (int) strlen(sql));
         if (ret != 0)
         {
-            this->SetError();
+            this->SetLastError();
             return false;
         }
 
@@ -213,7 +191,7 @@ bool MysqlConnect::Query(const char *sql, MYSQL_RES **res)
     }
     catch (const std::exception &)
     {
-        this->SetError();
+        this->SetLastError();
         return false;
     }
     return true;
@@ -241,7 +219,7 @@ IRecord *MysqlConnect::MakeDefRecord(const char *tableName)
         return nullptr;
 
     const unsigned long *colLens = mysql_fetch_lengths(res);
-    const uint32_t fieldNum = mysql_num_fields(res);
+    const uint32 fieldNum = mysql_num_fields(res);
 
     return CreateRecord(nullptr, dbFields, colLens, fieldNum, MODE::MODE_EDIT);
 }

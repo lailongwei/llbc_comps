@@ -1,14 +1,12 @@
-#ifndef _ASYNC_TASK_H_
-#define _ASYNC_TASK_H_
+#pragma once
 
 #include "IDB.h"
 
 enum class AsyncTaskType
 {
     None,
-    QueryRecord,     //查询单条记录
-    QueryRecordset,  //查询多条记录
-    QuerySql,        //执行sql
+    Query,       //查询多条记录
+    ExecuteSql,  //执行sql
 };
 
 /**
@@ -25,18 +23,8 @@ public:
     virtual void Invoke() = 0;
 
 public:
-    std::string sql;
+    LLBC_String sql;
     AsyncTaskType taskType;
-};
-
-/**
-* 查询单条记录
-*/
-struct __TaskQueryRecord
-{
-    MODE mode;
-    IRecord *result = nullptr;
-    DBAsyncRecordCB cb;
 };
 
 /**
@@ -46,7 +34,7 @@ struct __TaskQueryRecordset
 {
     MODE mode;
     IRecordset *result = nullptr;
-    DBAsyncRecordsetCB cb;
+    AsyncQueryCB cb;
 };
 
 /**
@@ -55,7 +43,7 @@ struct __TaskQueryRecordset
 struct __TaskQuerySql
 {
     bool result = false;
-    DBAsyncSqlCB cb;
+    AsyncSqlCB cb;
 };
 
 /**
@@ -74,8 +62,6 @@ public:
     TaskInfo task;
 };
 
-using TaskQueryRecord = AcyncTaskTemplate<__TaskQueryRecord>;
-using TaskQueryRecordset = AcyncTaskTemplate<__TaskQueryRecordset>;
+using TaskQuery = AcyncTaskTemplate<__TaskQueryRecordset>;
 using TaskQuerySql = AcyncTaskTemplate<__TaskQuerySql>;
 
-#endif  // !_ASYNC_TASK_H_

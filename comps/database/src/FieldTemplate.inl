@@ -1,5 +1,5 @@
 
-int64_t __Str2Int64(const char *str)
+sint64 __Str2Int64(const char *str)
 {
 #ifdef WIN32
     return ::_atoi64(str);
@@ -9,7 +9,7 @@ int64_t __Str2Int64(const char *str)
 }
 
 template <typename DataType>
-bool FieldTemplate<DataType>::SetValue(const char *value, uint32_t len)
+bool FieldTemplate<DataType>::SetValue(const char *value, uint32 len)
 {
     switch (_info.type)
     {
@@ -32,7 +32,7 @@ bool FieldTemplate<DataType>::SetValue(const char *value, uint32_t len)
 }
 
 template <typename DataType>
-int64_t FieldTemplate<DataType>::GetInt() const
+sint64 FieldTemplate<DataType>::GetInt() const
 {
     return _val;
 }
@@ -44,15 +44,15 @@ double FieldTemplate<DataType>::GetDouble() const
 }
 
 template <typename DataType>
-std::string &FieldTemplate<DataType>::GetStr() const
+LLBC_String &FieldTemplate<DataType>::GetStr() const
 {
     assert(false);
-    static std::string empty;
+    static LLBC_String empty;
     return empty;
 }
 
 template <typename DataType>
-void FieldTemplate<DataType>::SetInt(int64_t val)
+void FieldTemplate<DataType>::SetInt(sint64 val)
 {
     _val = val;
     TagChanged(true);
@@ -72,13 +72,13 @@ void FieldTemplate<DataType>::SetStr(const char *val)
 }
 
 template <typename DataType>
-void FieldTemplate<DataType>::SetBlob(const char *val, uint32_t len)
+void FieldTemplate<DataType>::SetBlob(const char *val, uint32 len)
 {
     assert(false);
 }
 
 
-bool FieldTemplate<std::string>::SetValue(const char *value, uint32_t len)
+bool FieldTemplate<LLBC_String>::SetValue(const char *value, uint32 len)
 {
     switch (_info.type)
     {
@@ -90,7 +90,7 @@ bool FieldTemplate<std::string>::SetValue(const char *value, uint32_t len)
     case FIELD_TYPE_LONG_BLOB:
     case FIELD_TYPE_DATE:
     case FIELD_TYPE_DATETIME:
-        _val = value ? std::string(value, len) : "";
+        _val = value ? LLBC_String(value, len) : "";
         break;
     default:
         return false;
@@ -99,41 +99,41 @@ bool FieldTemplate<std::string>::SetValue(const char *value, uint32_t len)
     return true;
 }
 
-int64_t FieldTemplate<std::string>::GetInt() const
+sint64 FieldTemplate<LLBC_String>::GetInt() const
 {
     assert(false);
     return 0;
 }
 
-double FieldTemplate<std::string>::GetDouble() const
+double FieldTemplate<LLBC_String>::GetDouble() const
 {
     assert(false);
     return 0;
 }
 
-const std::string &FieldTemplate<std::string>::GetStr() const
+const LLBC_String &FieldTemplate<LLBC_String>::GetStr() const
 {
     return _val;
 }
 
-void FieldTemplate<std::string>::SetInt(int64_t val)
+void FieldTemplate<LLBC_String>::SetInt(sint64 val)
 {
     assert(false);
 }
 
-void FieldTemplate<std::string>::SetDouble(double val)
+void FieldTemplate<LLBC_String>::SetDouble(double val)
 {
     assert(false);
 }
 
-void FieldTemplate<std::string>::SetStr(const char *val)
+void FieldTemplate<LLBC_String>::SetStr(const char *val)
 {
     _val = val;
     TagChanged(true);
 }
 
-void FieldTemplate<std::string>::SetBlob(const char *val, uint32_t len)
+void FieldTemplate<LLBC_String>::SetBlob(const char *val, uint32 len)
 {
-    _val.swap(std::string(val, len));
+    _val.swap(LLBC_String(val, len));
     TagChanged(true);
 }

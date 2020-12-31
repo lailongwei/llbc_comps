@@ -1,14 +1,14 @@
-#ifndef _BaseField_H_
-#define _BaseField_H_
+#pragma once
 
-#include <string>
+#include "llbc/common/StringDataType.h"
+using namespace llbc;
 
 struct DBFieldInfo
 {
-    std::string name;
-    uint32_t type = 0;
-    uint32_t attr = 0;
-    uint32_t len = 0;
+    LLBC_String name;
+    uint32 type = 0;
+    uint32 attr = 0;
+    uint32 len = 0;
 };
 
 class BaseField
@@ -33,30 +33,30 @@ public:
     {
         return _info.name.c_str();
     }
-    inline uint32_t GetType(void) const
+    inline uint32 GetType(void) const
     {
         return _info.type;
     }
-    inline uint32_t GetAttr(void) const
+    inline uint32 GetAttr(void) const
     {
         return _info.attr;
     }
-    inline size_t GetLen(void) const
+    inline uint32 GetLen(void) const
     {
         return _info.len;
     }
 
 public:
-    virtual bool SetValue(const char *value, uint32_t len) = 0;
+    virtual bool SetValue(const char *value, uint32 len) = 0;
 
-    virtual int64_t GetInt() const = 0;
+    virtual sint64 GetInt() const = 0;
     virtual double GetDouble() const = 0;
-    virtual const std::string &GetStr() const = 0;
+    virtual const LLBC_String &GetStr() const = 0;
 
-    virtual void SetInt(int64_t iVal) = 0;
+    virtual void SetInt(sint64 iVal) = 0;
     virtual void SetDouble(double val) = 0;
     virtual void SetStr(const char *val) = 0;
-    virtual void SetBlob(const char *val, uint32_t len) = 0;
+    virtual void SetBlob(const char *val, uint32 len) = 0;
 
 protected:
     BaseField(const BaseField &) = delete;
@@ -67,4 +67,3 @@ protected:
     bool _changed = false;
 };
 
-#endif
