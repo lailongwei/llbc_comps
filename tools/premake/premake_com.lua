@@ -13,6 +13,14 @@ COMPS_ROOT_DIR = LLBC_COMPS_REPO_ROOT_DIR .. "/comps" -- all comps root director
 THIRD_PARTIES_ROOT_DIR = LLBC_COMPS_REPO_ROOT_DIR .. "/3rds" -- 3rds root directory
 THIRD_PARTY__LLBC_DIR = THIRD_PARTIES_ROOT_DIR .. "/llbc/llbc" -- llbc 3rd directory
 
+-- All libraries output directory
+LLBC_OUTPUT_BASE_DIR = LLBC_COMPS_REPO_ROOT_DIR .. "/output/" .. _ACTION
+if IS_WINDOWS then
+    LLBC_OUTPUT_DIR = LLBC_OUTPUT_BASE_DIR .. "/$(Configuration)"
+else
+    LLBC_OUTPUT_DIR = LLBC_OUTPUT_BASE_DIR .. "/$(config)"
+end
+
 -- Execute system command
 function execute_cmd(cmd, raw)
     local f = assert(io.popen(cmd, 'r'))
@@ -195,18 +203,13 @@ function generate_comp_project(comp_name)
     kind "SharedLib"
 	
 	-- target dir
-    local comp_dir = COMPS_ROOT_DIR .. "/" .. comp_name
-    filter { "system:windows" }
-        targetdir(comp_dir .. "/lib/" .. _ACTION .. "/$(Configuration)")
-    filter {}
-    filter { "system:not windows" }
-        targetdir(comp_dir .. "/lib/" .. _ACTION .. "/$(config)")
-    filter {}
+	targetdir(LLBC_OUTPUT_DIR)
 
 	-- include llbc library
 	include_3rd_llbc(comp_name, false)
 
-    -- files
+	-- files
+	local comp_dir = COMPS_ROOT_DIR .. "/" .. comp_name
     files {
         comp_dir .. "/include/**.h",
 		comp_dir .. "/include/**.hpp",
@@ -214,6 +217,9 @@ function generate_comp_project(comp_name)
 		
 		comp_dir .. "/src/**.c",
 		comp_dir .. "/src/**.cpp",
+		comp_dir .. "/src/**.h",
+		comp_dir .. "/src/**.hpp",
+		comp_dir .. "/src/**.inl",
     }
 
     -- includedirs
@@ -296,27 +302,52 @@ function include_3rd_llbc(comp_name, add_files)
 	local comp_dir = COMPS_ROOT_DIR .. "/" .. comp_name
 	postbuildmessage(string.format(comp_name, "Copying llbc library files to component[%s] library...", comp_name))
 	filter { "system:windows", "configurations:debug*" }
-		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc_debug.dll\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION), "/", "\\"))
-		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc_debug.lib\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION), "/" ,"\\"))
-		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc_debug.pdb\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION), "/", "\\"))
+		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc_debug.dll\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR), "/", "\\"))
+		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc_debug.lib\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR), "/" ,"\\"))
+		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc_debug.pdb\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR), "/", "\\"))
 	filter {}
 	filter { "system:windows", "configurations:release*" }
-		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc.dll\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION), "/", "\\"))
-		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc.lib\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION), "/", "\\"))
-		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc.pdb\" \"%s/lib/%s/$(Configuration)/\"", llbc_lib_root_dir, comp_dir, _ACTION), "/", "\\"))
+		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc.dll\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR), "/", "\\"))
+		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc.lib\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR), "/", "\\"))
+		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc.pdb\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR), "/", "\\"))
 	filter {}
 	
 	filter { "system:linux", "configurations:debug*" }
-		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc_debug.so\" \"%s/lib/%s/$(config)/\"", llbc_lib_root_dir, comp_dir, _ACTION))
+		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc_debug.so\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
 	filter {}
 	filter { "system:not windows", "configurations:release*" }
-		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc.so\" \"%s/lib/%s/$(config)/\"", llbc_lib_root_dir, comp_dir, _ACTION))
+		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc.so\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
 	filter {}
 	
 	filter { "system:macosx", "configurations:debug*" }
-		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc_debug.dylib\" \"%s/lib/%s/$(config)/\"", llbc_lib_root_dir, comp_dir, _ACTION))
+		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc_debug.dylib\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
 	filter {}
 	filter { "system:macosx", "configurations:release*" }
-		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc.dylib\" \"%s/lib/%s/$(config)/\"", llbc_lib_root_dir, comp_dir, _ACTION))
+		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc.dylib\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
+	filter {}
+end
+
+function include_3rd_mysql(comp_name)
+	filter { "system:windows" }
+	includedirs {
+		THIRD_PARTIES_ROOT_DIR .. "/mysql/include",
+	}
+	filter {}
+	-- link mysql lib
+	filter { "system:windows"}
+		links { "libmysql.lib" }
+		libdirs { LLBC_OUTPUT_DIR }
+	filter {}
+	filter { "system:not windows"}
+		links { "libmysql" }
+	filter {}
+
+	filter { "system:windows"}
+		defines { "WIN32_LEAN_AND_MEAN" }
+	filter {}
+
+	filter { "system:windows", "configurations:debug64 or release64" }
+		prebuildcommands("copy /Y " .. string.gsub(string.format("\"%s/mysql/lib/win/x64/libmysql.lib\" \"%s\"", THIRD_PARTIES_ROOT_DIR, LLBC_OUTPUT_DIR), "/", "\\"))
+		prebuildcommands("copy /Y " .. string.gsub(string.format("\"%s/mysql/lib/win/x64/libmysql.dll\" \"%s\"", THIRD_PARTIES_ROOT_DIR, LLBC_OUTPUT_DIR), "/", "\\"))
 	filter {}
 end
