@@ -226,7 +226,11 @@ function generate_comp_project(comp_name)
     includedirs {
         comp_dir .. "/include",
         LLBC_COMPS_REPO_ROOT_DIR,
-    }
+	}
+	
+	defines {
+		"__LLBC_COMP_EXPORT"
+	}
 
     -- debug target suffix define
     filter { "configurations:debug*" }
@@ -300,8 +304,6 @@ function include_3rd_llbc(comp_name, add_files)
     filter {}
 	
 	-- copy library files to component library
-	local comp_dir = COMPS_ROOT_DIR .. "/" .. comp_name
-	postbuildmessage(string.format(comp_name, "Copying llbc library files to component[%s] library...", comp_name))
 	filter { "system:windows", "configurations:debug*" }
 		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc_debug.dll\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR), "/", "\\"))
 		postbuildcommands("copy /Y " .. string.gsub(string.format("\"%s/$(Configuration)/libllbc_debug.lib\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR), "/" ,"\\"))
@@ -351,4 +353,103 @@ function include_3rd_mysql(comp_name)
 		prebuildcommands("copy /Y " .. string.gsub(string.format("\"%s/mysql/lib/win/x64/libmysql.lib\" \"%s\"", THIRD_PARTIES_ROOT_DIR, LLBC_OUTPUT_DIR), "/", "\\"))
 		prebuildcommands("copy /Y " .. string.gsub(string.format("\"%s/mysql/lib/win/x64/libmysql.dll\" \"%s\"", THIRD_PARTIES_ROOT_DIR, LLBC_OUTPUT_DIR), "/", "\\"))
 	filter {}
+end
+
+-- ****************************************************************************
+-- core library testsuite compile setting
+function generate_game_project(name)
+    -- language, kind
+    language "c++"
+    kind "ConsoleApp"
+
+    -- symbols
+    symbols "On"
+
+    -- dependents
+    dependson {
+		"database"
+	}
+
+	-- target dir
+	targetdir(LLBC_OUTPUT_DIR)
+	
+	include_3rd_llbc(name, false)
+
+    -- files
+    files {
+        "../../GameServer/**.h",
+        "../../GameServer/**.cpp",
+    }
+
+    -- includedirswrap\csllbc\csharp\script_tools
+    includedirs {
+		LLBC_COMPS_REPO_ROOT_DIR,
+		THIRD_PARTY__LLBC_DIR .. "/include",
+    }
+
+    -- links
+    libdirs { LLBC_OUTPUT_DIR }
+    filter { "system:linux" }
+        links {
+            "dl",
+        }
+    filter {}
+
+    filter { "system:not windows", "configurations:debug*" }
+        links {
+            "llbc_debug",
+            "database_debug",
+        }
+    filter {}
+
+    filter { "system:not windows", "configurations:release*" }
+        links {
+            "llbc",
+            "database",
+        }
+    filter {}
+
+    filter { "system:windows" }
+        links {
+            "ws2_32",
+        }
+    filter {}
+
+    filter { "system:windows", "configurations:debug*" }
+        links {
+            "libllbc_debug",
+            "database_debug",
+        }
+    filter {}
+
+    filter { "system:windows", "configurations:release*" }
+        links {
+            "libllbc",
+            "database",
+        }
+    filter {}
+
+    filter { "system:not windows" }
+        buildoptions {
+            "-std=c++11",
+        }
+    filter {}
+
+    -- debug target suffix define
+    filter { "configurations:debug*" }
+        targetsuffix "_debug"
+    filter {}
+
+    -- enable multithread compile
+    enable_multithread_comp()
+
+    -- warnings
+    filter { "system:not windows" }
+        disablewarnings {
+            "invalid-source-encoding",
+        }
+    filter {}
+
+    -- optimize
+	set_optimize_opts()
 end

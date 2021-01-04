@@ -19,37 +19,43 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#pragma once
 
-#include "IDBMgr.h"
-#include "Database.h"
-#include <memory>
-#include <map>
+#include "GameServer.h"
 
-class DBMgr : public IDBMgr
+#include "llbc/comm/IService.h"
+#include "comps/database/include/DBMgrFactory.h"
+
+#include "Common/common.h"
+#include "Modules/Logic/Logic.h"
+
+GameApplication::GameApplication()
+    : _gameSvc(nullptr)
+{}
+
+int GameApplication::OnStart(int argc, char *argv[])
 {
-public:
-    DBMgr() = default;
-    virtual ~DBMgr() = default;
+    //create game service
+    _gameSvc = LLBC_IService::Create(LLBC_IService::Normal, _name);
 
-public:
-    virtual bool OnInitialize() override;
-    virtual void OnDestroy() override;
-    virtual bool OnStart() override;
-    virtual void OnStop() override;
-    virtual void OnUpdate() override;
+    // register component.
+    _gameSvc->RegisterFacade<DBMgrFactory>();
+    _gameSvc->RegisterFacade<LogicCompFactory>();
 
-public:
-    virtual void Flush() override;
+    _gameSvc->SetFPS(100);
+    if (_gameSvc->Start(4) != LLBC_OK)
+        return LLBC_FAILED;
 
-    virtual IDatabase *GetDatabase(const LLBC_String &dbConnName) override;
-    virtual IDatabase *GetDefaultDatabase() override;
+    return LLBC_OK;
+}
 
-private:
-    MysqlDB *CreateDatabase(const LLBC_String &ip, int port, const LLBC_String &user, const LLBC_String &passwd, const LLBC_String &dbName,
-                              int asyncConnNum);
+void GameApplication::OnWait() {}
 
-private:
-    MysqlDB *_defaultDB = nullptr;
-    std::map<LLBC_String, std::unique_ptr<MysqlDB>> _databases;
-};
+void GameApplication::OnStop() {}
+
+int main(int argc, char *argv[])
+{
+    g_GameServer.Start("GameServer", argc, argv);
+
+    g_GameServer.Stop();
+    return true;
+}

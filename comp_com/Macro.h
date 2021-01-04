@@ -31,14 +31,18 @@
 
 // The dllexport macro define.
 #if LLBC_TARGET_PLATFORM_WIN32
- #ifndef LLBC_COMP_EXPORT
+ #ifdef __LLBC_COMP_EXPORT
   #define LLBC_COMP_EXPORTING 0
   #define LLBC_COMP_EXPORT __declspec(dllexport)
+ #else
+  #define LLBC_COMP_EXPORTING 1
+  #define LLBC_COMP_EXPORT __declspec(dllimport)
  #endif
 #else
- #ifndef LLBC_COMP_EXPORT
-  #define LLBC_COMP_EXPORTING 0
+ #ifdef __LLBC_COMP_EXPORT
+  #define LLBC_COMP_EXPORTING 1
   #define LLBC_COMP_EXPORT __attribute__ ((__visibility__("default")))
+  #define LLBC_HIDDEN __attribute__((__visibility__("hidden")))
  #endif
 #endif
 
