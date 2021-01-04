@@ -22,6 +22,8 @@
 #pragma once
 
 #include <mutex>
+#include <condition_variable>
+#include <atomic>
 #include <queue>
 #include <vector>
 
@@ -48,7 +50,7 @@ public:
 private:
     std::mutex _lock;
     std::condition_variable _cv;
-    std::atomic_int _count = 0;
+    std::atomic_int _count = ATOMIC_FLAG_INIT;
 
     std::queue<AsyncTask *> _tasks;
 };
