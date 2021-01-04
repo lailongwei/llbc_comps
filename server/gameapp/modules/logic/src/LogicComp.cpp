@@ -19,8 +19,8 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "LogicComp.h"
-#include "GameServer/Common/common.h"
+#include "gameapp/modules/logic/Logic.h"
+#include "app_common/Common.h"
 
 #include "comps/database/include/DBMgrFactory.h"
 #include "comps/database/include/IDBMgr.h"

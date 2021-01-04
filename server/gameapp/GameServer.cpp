@@ -24,9 +24,8 @@
 
 #include "llbc/comm/IService.h"
 #include "comps/database/include/DBMgrFactory.h"
-
-#include "Common/common.h"
-#include "Modules/Logic/Logic.h"
+#include "app_common/Common.h"
+#include "gameapp/modules/logic/Logic.h"
 
 GameApplication::GameApplication()
     : _gameSvc(nullptr)
@@ -54,8 +53,7 @@ void GameApplication::OnStop() {}
 
 int main(int argc, char *argv[])
 {
-    g_GameServer.Start("GameServer", argc, argv);
-
+    g_GameServer.Start("gameapp", argc, argv);
     g_GameServer.Stop();
     return true;
 }

@@ -21,8 +21,7 @@
 
 #pragma once
 
-#include "LogicCompFactory.h"
-#include "LogicComp.h"
+#include "gameapp/modules/logic/Logic.h"
 
 LLBC_IFacade *LogicCompFactory::Create() const
 {

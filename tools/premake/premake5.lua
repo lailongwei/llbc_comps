@@ -59,5 +59,5 @@ project "database"
     generate_comp_project("database")
     include_3rd_mysql("database")    
 
-project "GameServer"
-    generate_game_project("GameServer")
+project "gameapp"
+    generate_server_project("gameapp")
