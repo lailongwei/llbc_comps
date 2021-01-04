@@ -224,7 +224,8 @@ function generate_comp_project(comp_name)
 
     -- includedirs
     includedirs {
-        comp_dir .. "/include"
+        comp_dir .. "/include",
+        LLBC_COMPS_REPO_ROOT_DIR,
     }
 
     -- debug target suffix define
@@ -313,17 +314,17 @@ function include_3rd_llbc(comp_name, add_files)
 	filter {}
 	
 	filter { "system:linux", "configurations:debug*" }
-		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc_debug.so\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
+		postbuildcommands(string.format("\\cp -rf \"%s/$(config)/libllbc_debug.so\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
 	filter {}
-	filter { "system:not windows", "configurations:release*" }
-		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc.so\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
+	filter { "system:linux", "configurations:release*" }
+		postbuildcommands(string.format("\\cp -rf \"%s/$(config)/libllbc.so\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
 	filter {}
 	
 	filter { "system:macosx", "configurations:debug*" }
-		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc_debug.dylib\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
+		postbuildcommands(string.format("\\cp -rf \"%s/$(config)/libllbc_debug.dylib\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
 	filter {}
 	filter { "system:macosx", "configurations:release*" }
-		postbuildcommands(string.format("\\cp -rf \"%s/${Configuration}/libllbc.dylib\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
+		postbuildcommands(string.format("\\cp -rf \"%s/$(config)/libllbc.dylib\" \"%s\"", llbc_lib_root_dir, LLBC_OUTPUT_DIR))
 	filter {}
 end
 
