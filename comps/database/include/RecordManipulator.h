@@ -1,20 +1,22 @@
 #pragma once
 
+#include "comp_com/Common.h"
+
 class IRecord;
 class IDatabase;
 
-class RecordManipulator
+class LLBC_COMP_EXPORT RecordManipulator
 {
 public:
-    // async create a default record.
+    // sync create a default record.
     static IRecord *MakeDefRecord(IDatabase* db, const char *tableName);
 
-    // async insert record.
+    // sync insert record.
     static bool Insert(IDatabase *db, IRecord *record);
 
-    // async update record.
+    // sync update record.
     static bool Update(IDatabase *db, IRecord *record);
 
-    // async delete record.
+    // sync delete record.
     static bool Delete(IDatabase *db, IRecord *record);
 };

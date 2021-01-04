@@ -1,11 +1,9 @@
 #pragma once
 
 #include "IDB.h"
-#include "llbc/comm/IFacade.h"
+#include "comp_com/Common.h"
 
-using namespace llbc;
-
-class IDBMgr : public LLBC_IFacade
+class LLBC_COMP_EXPORT IDBMgr : public LLBC_IFacade
 {
 public:
     IDBMgr()

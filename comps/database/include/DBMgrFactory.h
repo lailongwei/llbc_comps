@@ -1,10 +1,8 @@
 #pragma once
 
-#include "llbc/comm/IFacade.h"
+#include "comp_com/Common.h"
 
-using namespace llbc;
-
-class DBMgrFactory : public LLBC_IFacadeFactory
+class LLBC_COMP_EXPORT DBMgrFactory : public LLBC_IFacadeFactory
 {
 public:
     virtual LLBC_IFacade *Create() const;

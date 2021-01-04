@@ -37,6 +37,7 @@ int ExampleComp::Call_Foo(const LLBC_Variant &arg, LLBC_Variant &ret)
 {
     Foo(arg);
     ret = arg;
+    return 0;
 }
 
 LLBC_IFacade *ExampleCompFactory::Create() const

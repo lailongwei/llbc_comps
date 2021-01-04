@@ -33,7 +33,7 @@
 #if LLBC_TARGET_PLATFORM_WIN32
  #ifndef LLBC_COMP_EXPORT
   #define LLBC_COMP_EXPORTING 0
-  #define LLBC_COMP_EXPORT __declspec(dllimport)
+  #define LLBC_COMP_EXPORT __declspec(dllexport)
  #endif
 #else
  #ifndef LLBC_COMP_EXPORT

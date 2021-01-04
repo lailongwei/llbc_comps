@@ -1,11 +1,8 @@
 #pragma once
 
-#include <functional>
-#include "llbc/common/StringDataType.h"
+#include "comp_com/Common.h"
 
-using namespace llbc;
-
-enum class MODE
+enum class LLBC_COMP_EXPORT MODE
 {
     MODE_NONE,
     MODE_READ,  //read only
@@ -15,11 +12,12 @@ enum class MODE
 /**
 * Database single record object.
 */
-class IRecord
+class LLBC_COMP_EXPORT IRecord
 {
 public:
     virtual ~IRecord() = default;
 
+public:
     virtual sint64 GetInt(uint32 idx) const = 0;
     virtual double GetDouble(uint32 idx) const = 0;
     virtual const LLBC_String &GetStr(uint32 idx) const = 0;
@@ -43,11 +41,12 @@ public:
 /**
  * Database records set
  */
-class IRecordset
+class LLBC_COMP_EXPORT IRecordset
 {
 public:
     virtual ~IRecordset() = default;
 
+public:
     // Get a record from set. (not release record)
     virtual IRecord *GetRecord(uint32 idx) = 0;
 
@@ -73,11 +72,12 @@ using AsyncSqlCB = std::function<void(bool)>;
 /**
  * Database object.
  */
-class IDatabase
+class LLBC_COMP_EXPORT IDatabase
 {
 public:
     virtual ~IDatabase() = default;
 
+public:
     // Init database.
     virtual bool Init(const LLBC_String &ip, 
                       int port, 
