@@ -25,7 +25,7 @@
 #include "llbc/comm/IService.h"
 #include "comps/database/include/DBMgrFactory.h"
 #include "app_common/Common.h"
-#include "gameapp/modules/logic/Logic.h"
+#include "modules/logic/Logic.h"
 
 GameApplication::GameApplication()
     : _gameSvc(nullptr)

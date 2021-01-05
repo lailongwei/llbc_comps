@@ -28,7 +28,7 @@ class LLBC_COMP_EXPORT IDBMgr : public LLBC_IFacade
 {
 public:
     IDBMgr()
-        : LLBC_IFacade(LLBC_FacadeEvents::DefaultEvents | LLBC_FacadeEvents::OnUpdate)
+        : LLBC_IFacade(LLBC_FacadeEvents::DefaultEvents | LLBC_FacadeEvents::OnUpdate | LLBC_FacadeEvents::OnInitialize)
     {}
     virtual ~IDBMgr() = default;
 

@@ -37,7 +37,13 @@ enum class MODE;
 class MysqlConnect
 {
 public:
-    MysqlConnect(MysqlDB &db, const LLBC_String &ip, int port, const LLBC_String &user, const LLBC_String &passwd, const LLBC_String &dbName);
+    MysqlConnect(MysqlDB &db, 
+                 const LLBC_String& name, 
+                 const LLBC_String &ip, 
+                 int port, 
+                 const LLBC_String &user, 
+                 const LLBC_String &passwd, 
+                 const LLBC_String &dbName);
     ~MysqlConnect();
 
 public:
@@ -50,8 +56,8 @@ public:
     MYSQL *GetHandler();
 
     //get mysql last error.
-    uint32 GetLastErrorNo();
-    const LLBC_String GetLastError();
+    sint32 GetLastErrorNo();
+    const LLBC_String& GetLastError() const;
 
 public:
     // synchronize query.
@@ -80,13 +86,14 @@ private:
 private:
     MysqlDB &_db;
 
+    LLBC_String _name;
     LLBC_String _ip;
     sint32 _port;
     LLBC_String _user;
     LLBC_String _pwd;
     LLBC_String _dbName;
 
-    uint32 _lastErrorCode;
+    sint32 _lastErrorCode;
     LLBC_String _lastError;
 
     bool _opened = false;

@@ -32,6 +32,7 @@ public:
     // sync create a default record.
     static IRecord *MakeDefRecord(IDatabase* db, const char *tableName);
 
+public:
     // sync insert record.
     static bool Insert(IDatabase *db, IRecord *record);
 
@@ -40,4 +41,14 @@ public:
 
     // sync delete record.
     static bool Delete(IDatabase *db, IRecord *record);
+
+public:
+    // build update record sql.
+    static bool BuildUpdateSql(IDatabase *db, IRecord *record, LLBC_String &sql);
+
+    // build delete record sql.
+    static bool BuildDelSql(IDatabase *db, IRecord *record, LLBC_String &sql);
+
+    // build insert record sql.
+    static bool BuildInsertSql(IDatabase *db, IRecord *record, LLBC_String &sql);
 };

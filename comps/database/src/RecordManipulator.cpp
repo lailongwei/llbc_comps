@@ -42,3 +42,18 @@ bool RecordManipulator::Delete(IDatabase *db, IRecord *record)
 {
     return ((MysqlDB *) db)->Delete(record);
 }
+
+bool RecordManipulator::BuildUpdateSql(IDatabase *db, IRecord *record, LLBC_String &sql)
+{
+    return ((MysqlDB *) db)->BuildUpdateSql(record, sql);
+}
+
+bool RecordManipulator::BuildDelSql(IDatabase *db, IRecord *record, LLBC_String &sql)
+{
+    return ((MysqlDB *) db)->BuildDelSql(record, sql);
+}
+
+bool RecordManipulator::BuildInsertSql(IDatabase *db, IRecord *record, LLBC_String &sql)
+{
+    return ((MysqlDB *) db)->BuildInsertSql(record, sql);
+}

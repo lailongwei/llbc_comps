@@ -40,7 +40,8 @@ public:
     MysqlDB();
 
    // Init database.
-    virtual bool Init(const LLBC_String &ip, 
+    virtual bool Init(const LLBC_String& name,
+                      const LLBC_String &ip, 
                       int port, 
                       const LLBC_String &user, 
                       const LLBC_String &passwd, 
@@ -72,6 +73,15 @@ public:
  public:
     IRecord *MakeDefRecord(const char *tableName);
 
+    // build update record sql.
+    bool BuildUpdateSql(IRecord *record, LLBC_String &sql);
+
+    // build delete record sql.
+    bool BuildDelSql(IRecord *record, LLBC_String &sql);
+
+    // build insert record sql.
+    bool BuildInsertSql(IRecord *record, LLBC_String &sql);
+
     // sync insert record.
     bool Insert(IRecord *record);
 
@@ -99,6 +109,7 @@ private:
     bool _inited;
     std::thread::id _asyncThreadId;
     uint32 _asyncConnNum;
+    LLBC_String _name;
     
     std::atomic_bool _stoping; //结束标记
     std::atomic_bool _flushing; //刷新标记

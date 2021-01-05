@@ -26,14 +26,17 @@
 #include "FieldFactory.h"
 
 #include "llbc/core/thread/Guard.h"
+#include "llbc/core/log/Log.h"
 
 MysqlConnect::MysqlConnect(MysqlDB &db, 
+                           const LLBC_String &name, 
                            const LLBC_String &ip, 
                            int port, 
                            const LLBC_String &user, 
                            const LLBC_String &passwd,
                            const LLBC_String &dbName)
     : _db(db)
+    , _name(name)
     , _ip(ip)
     , _port(port)
     , _user(user)
@@ -56,6 +59,10 @@ bool MysqlConnect::Connect()
     if (!mysql_real_connect(hdbc, _ip.c_str(), _user.c_str(), _pwd.c_str(), _dbName.c_str(), _port, nullptr, 0))
     {
         this->SetLastError();
+        Log.e2<MysqlConnect>("could not connect to mysql. name[%s]errno[%d] errMsg[%s]",
+                             _name.c_str(),
+                             GetLastErrorNo(),
+                             GetLastError().c_str());
         mysql_close(hdbc);
         return false;
     }
@@ -99,12 +106,12 @@ MYSQL *MysqlConnect::GetHandler()
     return _dbHandler;
 }
 
-uint32 MysqlConnect::GetLastErrorNo()
+sint32 MysqlConnect::GetLastErrorNo()
 {
     return _lastErrorCode;
 }
 
-const LLBC_String MysqlConnect::GetLastError()
+const LLBC_String& MysqlConnect::GetLastError() const
 {
     return _lastError;
 }
@@ -123,7 +130,10 @@ Record *MysqlConnect::CreateRecord(MYSQL_ROW row,
         const DBFieldInfo *fieldInfo = _db.QueryDBFieldInfo(dbField);
 
         if (fieldInfo == nullptr)
+        {
+            Log.e2<MysqlConnect>("mysql create fieldInfo failed. name[%s]", _name.c_str());
             return nullptr;
+        }
 
         if (dbField.flags & PRI_KEY_FLAG)
             newRec->SetKeyIdx(i);
@@ -196,7 +206,10 @@ void MysqlConnect::SetLastError()
 bool MysqlConnect::Query(const char *sql, MYSQL_RES **res)
 {
     if (!IsConnect())
+    {
+        Log.e2<MysqlConnect>("mysql isn't connected, could not query. name[%s]", _name.c_str());
         return false;
+    }
 
     try
     {
@@ -204,6 +217,11 @@ bool MysqlConnect::Query(const char *sql, MYSQL_RES **res)
         if (ret != 0)
         {
             this->SetLastError();
+            Log.e2<MysqlConnect>("mysql query fail. name[%s] sql[%s] errno[%d] errMsg[%s]", 
+                                 _name.c_str(), 
+                                 sql, 
+                                 GetLastErrorNo(), 
+                                 GetLastError().c_str());
             return false;
         }
 
@@ -213,6 +231,11 @@ bool MysqlConnect::Query(const char *sql, MYSQL_RES **res)
     catch (const std::exception &)
     {
         this->SetLastError();
+        Log.e2<MysqlConnect>("mysql query crash. name[%s] sql[%s] errno[%d] errMsg[%s]", 
+                             _name.c_str(), 
+                             sql, 
+                             GetLastErrorNo(), 
+                             GetLastError().c_str());
         return false;
     }
     return true;
@@ -229,7 +252,14 @@ IRecord *MysqlConnect::MakeDefRecord(const char *tableName)
         return nullptr;
 
     if (!res)
+    {
+        Log.e2<MysqlConnect>("mysql def record res is null. name[%s] table[%s] errno[%d] errMsg[%s]", 
+                             _name.c_str(), 
+                             tableName, 
+                             GetLastErrorNo(), 
+                             GetLastError().c_str());
         return nullptr;
+    }
 
     //函数结束自动释放MYSQL_RES
     std::shared_ptr<void> _resGuard((void *) 0, [res](void *) { mysql_free_result(res); });
@@ -237,7 +267,14 @@ IRecord *MysqlConnect::MakeDefRecord(const char *tableName)
     // 取字段信息
     MYSQL_FIELD *dbFields = mysql_fetch_fields(res);
     if (!dbFields)
+    {
+        Log.e2<MysqlConnect>("mysql def record field is null. name[%s] table[%s] errno[%d] errMsg[%s]",
+                             _name.c_str(),
+                             tableName,
+                             GetLastErrorNo(),
+                             GetLastError().c_str());
         return nullptr;
+    }
 
     const unsigned long *colLens = mysql_fetch_lengths(res);
     const uint32 fieldNum = mysql_num_fields(res);
