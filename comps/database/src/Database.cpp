@@ -226,10 +226,25 @@ IRecord *MysqlDB::MakeDefRecord(const char *tableName)
     return _syncConn->MakeDefRecord(tableName);
 }
 
+bool MysqlDB::BuildUpdateSql(IRecord *record, LLBC_String &sql)
+{
+    return SqlUtil::BuildUpdateSql(_syncConn->GetHandler(), (Record *) record, sql);
+}
+
+bool MysqlDB::BuildDelSql(IRecord *record, LLBC_String &sql)
+{
+    return SqlUtil::BuildDelSql(_syncConn->GetHandler(), (Record *) record, sql);
+}
+
+bool MysqlDB::BuildInsertSql(IRecord *record, LLBC_String &sql)
+{
+    return SqlUtil::BuildInsertSql(_syncConn->GetHandler(), (Record *) record, sql);
+}
+
 bool MysqlDB::Insert(IRecord *record)
 {
     LLBC_String sql;
-    if (!SqlUtil::BuildInsertSql(_syncConn->GetHandler(), (Record *) record, sql))
+    if (!BuildInsertSql(record, sql))
         return false;
 
     return _syncConn->Query(sql.c_str());
@@ -242,7 +257,7 @@ bool MysqlDB::Update(IRecord *record)
         return false;
 
     LLBC_String sql;
-    if (!SqlUtil::BuildUpdateSql(_syncConn->GetHandler(), updateRec, sql))
+    if (!BuildUpdateSql(record, sql))
         return false;
 
     // 可能没有可更新字段
@@ -263,7 +278,7 @@ bool MysqlDB::Delete(IRecord *record)
         return false;
 
     LLBC_String sql;
-    if (!SqlUtil::BuildDelSql(_syncConn->GetHandler(), delRec, sql))
+    if (!BuildDelSql(record, sql))
         return false;
 
     return _syncConn->Query(sql.c_str());

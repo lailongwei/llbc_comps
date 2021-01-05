@@ -72,6 +72,15 @@ public:
  public:
     IRecord *MakeDefRecord(const char *tableName);
 
+    // build update record sql.
+    bool BuildUpdateSql(IRecord *record, LLBC_String &sql);
+
+    // build delete record sql.
+    bool BuildDelSql(IRecord *record, LLBC_String &sql);
+
+    // build insert record sql.
+    bool BuildInsertSql(IRecord *record, LLBC_String &sql);
+
     // sync insert record.
     bool Insert(IRecord *record);
 
