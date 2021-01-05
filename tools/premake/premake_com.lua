@@ -12,7 +12,7 @@ LLBC_COMPS_REPO_ROOT_DIR = path.getabsolute("../..") -- the llbc_comps root dire
 COMPS_ROOT_DIR = LLBC_COMPS_REPO_ROOT_DIR .. "/comps" -- all comps root directory
 THIRD_PARTIES_ROOT_DIR = LLBC_COMPS_REPO_ROOT_DIR .. "/3rds" -- 3rds root directory
 THIRD_PARTY__LLBC_DIR = THIRD_PARTIES_ROOT_DIR .. "/llbc/llbc" -- llbc 3rd directory
-SERVER_ROOT_DIR = LLBC_COMPS_REPO_ROOT_DIR .. "/server" -- all server root directory
+APPS_ROOT_DIR = LLBC_COMPS_REPO_ROOT_DIR .. "/apps" -- all app root directory
 
 -- All libraries output directory
 LLBC_OUTPUT_BASE_DIR = LLBC_COMPS_REPO_ROOT_DIR .. "/output/" .. _ACTION
@@ -357,8 +357,8 @@ function include_3rd_mysql(comp_name)
 end
 
 -- ****************************************************************************
--- core library server compile setting
-function generate_server_project(name)
+-- core library app compile setting
+function generate_app_project(name)
     -- language, kind
     language "c++"
     kind "ConsoleApp"
@@ -380,15 +380,15 @@ function generate_server_project(name)
 
     -- files
     files {
-        "../../server/app_common/**.h",
-        "../../server/app_common/**.cpp",
-        string.format("../../server/%s/**.h", name),
-        string.format("../../server/%s/**.cpp", name),
+        "../../apps/app_common/**.h",
+        "../../apps/app_common/**.cpp",
+        string.format("../../apps/%s/**.h", name),
+        string.format("../../apps/%s/**.cpp", name),
     }
 
     -- includedirswrap\csllbc\csharp\script_tools
     includedirs {
-        SERVER_ROOT_DIR,
+        APPS_ROOT_DIR,
         LLBC_COMPS_REPO_ROOT_DIR,
         THIRD_PARTY__LLBC_DIR .. "/include",
     }

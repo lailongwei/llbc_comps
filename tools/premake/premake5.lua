@@ -60,4 +60,4 @@ project "database"
     include_3rd_mysql("database")    
 
 project "gameapp"
-    generate_server_project("gameapp")
+    generate_app_project("gameapp")
