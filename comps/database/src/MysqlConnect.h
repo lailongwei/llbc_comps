@@ -21,8 +21,7 @@
 
 #pragma once
 
-#include <mysql_version.h>
-#include <mysql.h>
+#include <mysql/mysql.h>
 
 #include "llbc/common/BasicDataType.h"
 #include "llbc/common/StringDataType.h"
@@ -82,7 +81,7 @@ private:
     MysqlDB &_db;
 
     LLBC_String _ip;
-    int32_t _port;
+    sint32 _port;
     LLBC_String _user;
     LLBC_String _pwd;
     LLBC_String _dbName;

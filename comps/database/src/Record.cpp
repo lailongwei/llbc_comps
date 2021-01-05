@@ -84,7 +84,7 @@ uint32 Record::GetFieldNum() const
 void Record::WriteField(uint32 idx, BaseField *field)
 {
     _fieldName2Idx[LLBC_String(field->GetName())] = idx;
-    _fields[idx].swap(std::unique_ptr<BaseField>(field));
+    _fields[idx].reset(field);
 }
 
 void Record::ClsEditFlag(void)

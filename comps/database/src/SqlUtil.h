@@ -22,8 +22,8 @@
 #pragma once
 
 #include <string>
-#include <mysql.h>
-#include "llbc/common/StringDataType.h"
+#include <mysql/mysql.h>
+#include "comp_com/Common.h"
 
 using namespace llbc;
 

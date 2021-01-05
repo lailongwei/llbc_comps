@@ -333,9 +333,9 @@ end
 
 function include_3rd_mysql(comp_name)
     filter { "system:windows" }
-    includedirs {
-        THIRD_PARTIES_ROOT_DIR .. "/mysql/include",
-    }
+    	includedirs {
+        	THIRD_PARTIES_ROOT_DIR .. "/mysql/include",
+    	}
     filter {}
     -- link mysql lib
     filter { "system:windows"}
@@ -343,7 +343,7 @@ function include_3rd_mysql(comp_name)
         libdirs { LLBC_OUTPUT_DIR }
     filter {}
     filter { "system:not windows"}
-        links { "libmysql" }
+        links { "mysqlclient" }
     filter {}
 
     filter { "system:windows"}
@@ -427,17 +427,10 @@ function generate_server_project(name)
             "database_debug",
         }
     filter {}
-
     filter { "system:windows", "configurations:release*" }
         links {
             "libllbc",
             "database",
-        }
-    filter {}
-
-    filter { "system:not windows" }
-        buildoptions {
-            "-std=c++11",
         }
     filter {}
 

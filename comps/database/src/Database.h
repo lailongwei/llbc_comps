@@ -21,17 +21,17 @@
 
 #pragma once
 
-#include <mysql_version.h>
-#include "mysql.h"
+#include <mysql/mysql.h>
 #include <mutex>
 #include <vector>
 #include <map>
 #include <memory>
+#include <thread>
 
 #include "AsyncTask.h"
 #include "AsyncTaskQueue.h"
+#include "MysqlConnect.h"
 
-class MysqlConnect;
 struct DBFieldInfo;
 
 class MysqlDB : public IDatabase

@@ -154,6 +154,6 @@ void FieldTemplate<LLBC_String>::SetStr(const char *val)
 
 void FieldTemplate<LLBC_String>::SetBlob(const char *val, uint32 len)
 {
-    _val.swap(LLBC_String(val, len));
+    _val.assign(val, len);
     TagChanged(true);
 }

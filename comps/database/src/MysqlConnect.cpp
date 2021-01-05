@@ -164,7 +164,7 @@ IRecordset *MysqlConnect::Query(const char *sql, MODE mode)
     const unsigned long *colLens = mysql_fetch_lengths(res);
     const uint32 fieldNum = mysql_num_fields(res);
 
-    std::unique_ptr<Recordset> recSet = std::make_unique<Recordset>(static_cast<uint32>(mysql_num_rows(res)));
+    std::unique_ptr<Recordset> recSet(new Recordset(static_cast<uint32>(mysql_num_rows(res))));
 
     MYSQL_ROW row;
     uint32 idx = 0;

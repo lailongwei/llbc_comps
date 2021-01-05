@@ -44,7 +44,7 @@ bool MysqlDB::Init(const LLBC_String &ip, int port, const LLBC_String &user, con
     if (_inited)
         return false;
 
-    _syncConn = std::make_unique<MysqlConnect>(*this, ip, port, user, passwd, dbName);
+    _syncConn.reset(new MysqlConnect(*this, ip, port, user, passwd, dbName));
     if (!_syncConn->Connect())
         return false;
 
@@ -52,7 +52,7 @@ bool MysqlDB::Init(const LLBC_String &ip, int port, const LLBC_String &user, con
 
     for (uint32 i = 0; i < _asyncConnNum; ++i)
     {
-        std::unique_ptr<MysqlConnect> conn = std::make_unique<MysqlConnect>(*this, ip, port, user, passwd, dbName);
+        std::unique_ptr<MysqlConnect> conn(new MysqlConnect(*this, ip, port, user, passwd, dbName));
         if (!conn->Connect())
             return false;
 
@@ -65,9 +65,9 @@ bool MysqlDB::Init(const LLBC_String &ip, int port, const LLBC_String &user, con
 
     for (uint32 i = 0; i < _asyncConnNum; ++i)
     {
-        _flushFlag.emplace_back(std::make_unique<std::atomic_bool>());
-        _taskQueues.emplace_back(std::make_unique<AsyncTaskQueue>());
-        _asyncThreads.emplace_back(std::make_unique<std::thread>(&MysqlDB::AsyncWorkFunc, this, i));
+        _flushFlag.emplace_back(std::unique_ptr<std::atomic_bool>(new std::atomic_bool));
+        _taskQueues.emplace_back(std::unique_ptr<AsyncTaskQueue>(new AsyncTaskQueue()));
+        _asyncThreads.emplace_back(std::unique_ptr<std::thread>(new std::thread (&MysqlDB::AsyncWorkFunc, this, i)));
     }
 
     _asyncThreadId = std::this_thread::get_id();
@@ -203,9 +203,9 @@ const DBFieldInfo *MysqlDB::QueryDBFieldInfo(const MYSQL_FIELD &field)
 
     char key[1024] = { 0 };
     snprintf(key, sizeof(key) - 1, "%s.%s", field.org_table, field.org_name);
-    strlwr(key);
 
     LLBC_String findKey(key);
+    std::transform(findKey.begin(), findKey.end(), findKey.begin(), ::tolower);
 
     std::lock_guard<std::mutex> l(_fieldLock);
     auto it = _fieldInfos.find(findKey);

@@ -22,7 +22,7 @@
 #include "SqlUtil.h"
 #include "Record.h"
 #include "BaseField.h"
-#include <mysql.h>
+#include <mysql/mysql.h>
 #include <sstream>
 #include <list>
 #include <assert.h>
@@ -94,7 +94,7 @@ void SqlUtil::BuildFormatSql(MYSQL *handle, const BaseField *field, char *format
     case FIELD_TYPE_TINY:
     {
         if ((field->GetAttr() & UNSIGNED_FLAG) != 0)
-            snprintf(format, formatSize, "`%s`=%lu", field->GetName(), (DWORD) field->GetInt());
+            snprintf(format, formatSize, "`%s`=%lu", field->GetName(), (unsigned long) field->GetInt());
         else
             snprintf(format, formatSize, "`%s`=%d", field->GetName(), (int) field->GetInt());
     }
@@ -102,7 +102,7 @@ void SqlUtil::BuildFormatSql(MYSQL *handle, const BaseField *field, char *format
     case FIELD_TYPE_SHORT:
     {
         if ((field->GetAttr() & UNSIGNED_FLAG) != 0)
-            snprintf(format, formatSize, "`%s`=%lu", field->GetName(), (DWORD) field->GetInt());
+            snprintf(format, formatSize, "`%s`=%lu", field->GetName(), (unsigned long) field->GetInt());
         else
             snprintf(format, formatSize, "`%s`=%d", field->GetName(), (int) field->GetInt());
     }
