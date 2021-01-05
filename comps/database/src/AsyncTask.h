@@ -76,7 +76,7 @@ class AcyncTaskTemplate : public AsyncTask
 public:
     virtual void Invoke() override
     {
-        std::invoke(task.cb, task.result);
+        task.cb(task.result);
     }
 
 public:

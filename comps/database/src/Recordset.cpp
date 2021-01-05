@@ -52,5 +52,5 @@ IRecord &Recordset::operator[](uint32 idx)
 
 void Recordset::WriteRecord(uint32 idx, IRecord *record)
 {
-    _records[idx].swap(std::unique_ptr<IRecord>(record));
+    _records[idx].reset(record);
 }

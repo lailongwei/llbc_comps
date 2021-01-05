@@ -22,7 +22,7 @@
 #pragma once
 
 #include "BaseField.h"
-#include "mysql.h"
+#include <mysql/mysql.h>
 #include <assert.h>
 
 template <typename DataType>

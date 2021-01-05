@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "llbc/common/StringDataType.h"
+#include "comp_com/Common.h"
 using namespace llbc;
 
 struct DBFieldInfo
