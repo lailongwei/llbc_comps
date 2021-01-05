@@ -58,15 +58,15 @@ PREMAKE_NAME	:= "premake5_$(PLATFORMNAME)"
 help:
 	@echo "make commands:"
 	@echo "========================================================================="
-	@echo "  make [help]   - display this help information"
+	@echo "  make [help]   - display this help information."
 	@echo "========================================================================="
 	@echo "  make all        - make all components&applications"
 	@echo "  make <comp/app> - make specific component/application."
 	@echo "                  - now supported comps: $(ALL_COMPS)."
 	@echo "                  - now supported applications: $(ALL_APPS)."
 	@echo "========================================================================="
-	@echo "  make clean            - remove all object directories and target files"
-	@echo "  make clean_<comp/application> - remove specific componet/application object directory and target files"
+	@echo "  make clean            - remove all object directories and target files."
+	@echo "  make clean_<comp/application> - remove specific componet/application object directory and target files."
 
 all: $(ALL_TARGETS)
 
