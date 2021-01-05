@@ -30,8 +30,10 @@ endif
 # All make targets define
 PREMAKE_TARGET := build_makefiles
 ALL_COMPS      := $(shell ls comps)
-ALL_TARGETS    := $(ALL_COMPS)
+ALL_APPS       := $(subst app_common,,$(shell ls apps))
+ALL_TARGETS    := $(PREMAKE_TARGET) $(ALL_COMPS) $(ALL_APPS)
 CLEAN_ALL_TARGETS := $(addprefix clean_,$(ALL_COMPS))
+CLEAN_ALL_TARGETS += $(addprefix clean_,$(ALL_APPS))
 
 # All targets output directory
 ALL_TARGETS_OUTPUT := output/gmake/$(config)
@@ -58,19 +60,23 @@ help:
 	@echo "========================================================================="
 	@echo "  make [help]   - display this help information"
 	@echo "========================================================================="
-	@echo "  make all      - make all components"
-	@echo "  make <comp>   - make specific component."
-	@echo "                - now supported comps: $(ALL_COMPS)"
+	@echo "  make all        - make all components&applications"
+	@echo "  make <comp/app> - make specific component/application."
+	@echo "                  - now supported comps: $(ALL_COMPS)."
+	@echo "                  - now supported applications: $(ALL_APPS)."
 	@echo "========================================================================="
-	@echo "  make clean        - remove all object directories and target files"
-	@echo "  make clean_<comp> - remove specific componet object directory and target file"
+	@echo "  make clean            - remove all object directories and target files"
+	@echo "  make clean_<comp/application> - remove specific componet/application object directory and target files"
 
-all: $(ALL_COMPS)
+all: $(ALL_TARGETS)
 
 $(PREMAKE_TARGET):
 	cd $(PREMAKE_PATH) && ./$(PREMAKE_NAME) gmake
 
 $(ALL_COMPS): $(PREMAKE_TARGET)
+	cd build/gmake && make -f $@.make
+
+$(ALL_APPS): $(PREMAKE_TARGET)
 	cd build/gmake && make -f $@.make
 
 clean: $(PREAMAKE_TARGET)
