@@ -40,7 +40,8 @@ public:
     MysqlDB();
 
    // Init database.
-    virtual bool Init(const LLBC_String &ip, 
+    virtual bool Init(const LLBC_String& name,
+                      const LLBC_String &ip, 
                       int port, 
                       const LLBC_String &user, 
                       const LLBC_String &passwd, 
@@ -108,6 +109,7 @@ private:
     bool _inited;
     std::thread::id _asyncThreadId;
     uint32 _asyncConnNum;
+    LLBC_String _name;
     
     std::atomic_bool _stoping; //结束标记
     std::atomic_bool _flushing; //刷新标记

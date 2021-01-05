@@ -19,7 +19,7 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "gameapp/modules/logic/Logic.h"
+#include "modules/logic/Logic.h"
 #include "app_common/Common.h"
 
 #include "comps/database/include/DBMgrFactory.h"
@@ -63,7 +63,9 @@ void LogicComp::DatabaseTest()
         "PRIMARY KEY(`id`)"
         ") ENGINE = InnoDB;";
 
-    ASSERT(defDB);
+    if (!defDB)
+        return;
+
     ASSERT(defDB->Query("drop table if exists `llbc`"));
     ASSERT(defDB->Query(createTableSql));
 

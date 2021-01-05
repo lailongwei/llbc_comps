@@ -26,6 +26,8 @@
 #include "BaseField.h"
 #include "Record.h"
 
+#include "llbc/core/log/Log.h"
+
 //校验同步操作是否是在同步线程调用
 #define CHECK_ASYNC_THREAD assert(_asyncThreadId == std::this_thread::get_id());
 //sleep milliseconds time
@@ -39,22 +41,39 @@ MysqlDB::MysqlDB()
     , _flushing(false)
 {}
 
-bool MysqlDB::Init(const LLBC_String &ip, int port, const LLBC_String &user, const LLBC_String &passwd, const LLBC_String &dbName, int acyncConnNum)
+bool MysqlDB::Init(const LLBC_String &name, 
+                   const LLBC_String &ip, 
+                   int port, 
+                   const LLBC_String &user, 
+                   const LLBC_String &passwd,
+                   const LLBC_String &dbName,
+                   int acyncConnNum)
 {
     if (_inited)
+    {
+        Log.e2<MysqlDB>("Database name[%s] already init.", name.c_str());
         return false;
+    }
 
-    _syncConn.reset(new MysqlConnect(*this, ip, port, user, passwd, dbName));
+    Log.i2<MysqlDB>("Init database. name[%s]", name.c_str());
+
+    _syncConn.reset(new MysqlConnect(*this, name, ip, port, user, passwd, dbName));
     if (!_syncConn->Connect())
+    {
+        Log.e2<MysqlDB>("Failed to connect to database. name[%s]", name.c_str());
         return false;
+    }
 
     _asyncConnNum = std::max<int>(acyncConnNum, 1);
 
     for (uint32 i = 0; i < _asyncConnNum; ++i)
     {
-        std::unique_ptr<MysqlConnect> conn(new MysqlConnect(*this, ip, port, user, passwd, dbName));
+        std::unique_ptr<MysqlConnect> conn(new MysqlConnect(*this, name, ip, port, user, passwd, dbName));
         if (!conn->Connect())
+        {
+            Log.e2<MysqlDB>("Failed to connect to database. name[%s]", name.c_str());
             return false;
+        }
 
         _asyncConns.emplace_back(std::move(conn));
     }
@@ -71,6 +90,8 @@ bool MysqlDB::Init(const LLBC_String &ip, int port, const LLBC_String &user, con
     }
 
     _asyncThreadId = std::this_thread::get_id();
+
+    _name = name;
     _inited = true;
     return true;
 }
@@ -78,8 +99,14 @@ bool MysqlDB::Init(const LLBC_String &ip, int port, const LLBC_String &user, con
 void MysqlDB::Destroy()
 {
     CHECK_ASYNC_THREAD
+
+    Log.i2<MysqlDB>("Destroy database. name[%s]", _name.c_str());
+
     if (!_inited || _stoping)
+    {
+        Log.e2<MysqlDB>("Database isn't init, could not destroy. name[%s]", _name.c_str());
         return;
+    }
 
     this->Flush();
 
@@ -121,8 +148,14 @@ void MysqlDB::Destroy()
 void MysqlDB::Flush()
 {
     CHECK_ASYNC_THREAD
+
+    Log.i2<MysqlDB>("Flush database. name[%s]", _name.c_str());
+
     if (!_inited || _flushing)
+    {
+        Log.e2<MysqlDB>("Database isn't init, could not flush. name[%s]", _name.c_str());
         return;
+    }
 
     for (uint32 i = 0; i < _asyncConnNum; ++i) 
         *_flushFlag[i] = false;

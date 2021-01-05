@@ -23,7 +23,7 @@
 
 #include "comp_com/Common.h"
 
-enum class LLBC_COMP_EXPORT MODE
+enum class MODE
 {
     MODE_NONE,
     MODE_READ,  //read only
@@ -100,7 +100,8 @@ public:
 
 public:
     // Init database.
-    virtual bool Init(const LLBC_String &ip, 
+    virtual bool Init(const LLBC_String &name, 
+                      const LLBC_String &ip, 
                       int port, 
                       const LLBC_String &user, 
                       const LLBC_String &passwd, 

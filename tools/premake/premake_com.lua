@@ -388,9 +388,14 @@ function generate_app_project(name)
 
     -- includedirswrap\csllbc\csharp\script_tools
     includedirs {
-        APPS_ROOT_DIR,
-        LLBC_COMPS_REPO_ROOT_DIR,
-        THIRD_PARTY__LLBC_DIR .. "/include",
+		-- apps dir
+		APPS_ROOT_DIR,
+		-- apps/app dir
+		string.format("%s/%s", APPS_ROOT_DIR, name), 
+		-- root dir
+		LLBC_COMPS_REPO_ROOT_DIR, 
+		-- llbc include dir
+        THIRD_PARTY__LLBC_DIR .. "/include", 
     }
 
     -- links

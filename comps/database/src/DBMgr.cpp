@@ -20,33 +20,81 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "DBMgr.h"
-#include "IDB.h"
+
+#include "llbc/core/log/Log.h"
 
 bool DBMgr::OnInitialize()
 {
     const auto& dbCfg = LLBC_IApplication::ThisApp()->GetIniConfig();
-    auto dbSession = dbCfg.GetSection("DefaultDB");
-    if (!dbSession)
-        return false;
+    const auto dbNum = dbCfg.GetValue<uint32>("Database", "num");
+    if (dbNum == 0)
+    {
+        Log.i2<DBMgr>("Database config is zero.");
+        return true;
+    }
 
-    const auto ip = dbSession->GetValue<LLBC_String>("ip");
-    const auto port = dbSession->GetValue<uint32>("port");
-    const auto name = dbSession->GetValue<LLBC_String>("name");
-    const auto pwd = dbSession->GetValue<LLBC_String>("passwd");
-    const auto db = dbSession->GetValue<LLBC_String>("db");
-    const auto connectNum = dbSession->GetValue<uint32>("connect");
+    for (int i = 1; i<= dbNum; ++i)
+    {
+        LLBC_String cfgName;
+        cfgName.format("Database%d", i);
+        auto dbSession = dbCfg.GetSection(cfgName);
+        if (!dbSession)
+        {
+            Log.e2<DBMgr>("Can't found database config. [%s]", cfgName.c_str());
+            return false;
+        }
 
-    _defaultDB = CreateDatabase(ip, port, name, pwd, db, connectNum);
+        const auto name = dbSession->GetValue<LLBC_String>("name");
+        const auto ip = dbSession->GetValue<LLBC_String>("ip");
+        const auto port = dbSession->GetValue<uint32>("port");
+        const auto user = dbSession->GetValue<LLBC_String>("user");
+        const auto pwd = dbSession->GetValue<LLBC_String>("passwd");
+        const auto db = dbSession->GetValue<LLBC_String>("db");
+        const auto connectNum = dbSession->GetValue<uint32>("connect");
+        const auto def = dbSession->GetValue<uint32>("default");
+
+        auto newDB = CreateDatabase(name, ip, port, user, pwd, db, connectNum);
+        if (!newDB)
+        {
+            Log.e2<DBMgr>("Failed to create database. name[%s]", name.c_str());
+            return false;
+        }
+
+        if (def > 0)
+        {
+            if (_defaultDB)
+            {
+                Log.e2<DBMgr>("Default database is repeated. name[%s]", name.c_str());
+                return false;
+            }
+            _defaultDB = newDB;
+        }
+
+        if (_databases.find(name) != _databases.end())
+        {
+            Log.e2<DBMgr>("Database name is repeated. name[%s]", name.c_str());
+            return false;
+        }
+
+        _databases[name].reset(newDB);
+    }
+
     if (!_defaultDB)
+    {
+        Log.e2<DBMgr>("Default database is null.");
         return false;
-
-    _databases["DefaultDB"].reset(_defaultDB);
+    }
+    
     return true;
 }
 
 void DBMgr::OnDestroy()
 {
-    // do nothing
+    for (auto& db : _databases)
+    {
+        if (db.second)
+            db.second->Destroy();
+    }
 }
 
 bool DBMgr::OnStart()
@@ -84,11 +132,16 @@ IDatabase *DBMgr::GetDefaultDatabase()
     return _defaultDB;
 }
 
-MysqlDB *DBMgr::CreateDatabase(const LLBC_String &ip, int port, const LLBC_String &user, const LLBC_String &passwd, const LLBC_String &dbName,
-                          int asyncConnNum)
+MysqlDB *DBMgr::CreateDatabase(const LLBC_String &name, 
+                               const LLBC_String &ip, 
+                               int port, 
+                               const LLBC_String &user, 
+                               const LLBC_String &passwd,
+                               const LLBC_String &dbName,
+                               int asyncConnNum)
 {
     MysqlDB *db = new MysqlDB();
-    if (!db->Init(ip, port, user, passwd, dbName, asyncConnNum))
+    if (!db->Init(name, ip, port, user, passwd, dbName, asyncConnNum))
     {
         delete db;
         return nullptr;

@@ -46,8 +46,13 @@ public:
     virtual IDatabase *GetDefaultDatabase() override;
 
 private:
-    MysqlDB *CreateDatabase(const LLBC_String &ip, int port, const LLBC_String &user, const LLBC_String &passwd, const LLBC_String &dbName,
-                              int asyncConnNum);
+    MysqlDB *CreateDatabase(const LLBC_String& name,
+                            const LLBC_String &ip, 
+                            int port, 
+                            const LLBC_String &user, 
+                            const LLBC_String &passwd, 
+                            const LLBC_String &dbName,
+                            int asyncConnNum);
 
 private:
     MysqlDB *_defaultDB = nullptr;
