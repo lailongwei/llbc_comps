@@ -1,11 +1,29 @@
+// The MIT License (MIT)
+
+// Copyright (c) 2013 lailongwei<lailongwei@126.com>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 #pragma once
 
-#include <functional>
-#include "llbc/common/StringDataType.h"
+#include "comp_com/Common.h"
 
-using namespace llbc;
-
-enum class MODE
+enum class LLBC_COMP_EXPORT MODE
 {
     MODE_NONE,
     MODE_READ,  //read only
@@ -15,11 +33,12 @@ enum class MODE
 /**
 * Database single record object.
 */
-class IRecord
+class LLBC_COMP_EXPORT IRecord
 {
 public:
     virtual ~IRecord() = default;
 
+public:
     virtual sint64 GetInt(uint32 idx) const = 0;
     virtual double GetDouble(uint32 idx) const = 0;
     virtual const LLBC_String &GetStr(uint32 idx) const = 0;
@@ -43,11 +62,12 @@ public:
 /**
  * Database records set
  */
-class IRecordset
+class LLBC_COMP_EXPORT IRecordset
 {
 public:
     virtual ~IRecordset() = default;
 
+public:
     // Get a record from set. (not release record)
     virtual IRecord *GetRecord(uint32 idx) = 0;
 
@@ -73,11 +93,12 @@ using AsyncSqlCB = std::function<void(bool)>;
 /**
  * Database object.
  */
-class IDatabase
+class LLBC_COMP_EXPORT IDatabase
 {
 public:
     virtual ~IDatabase() = default;
 
+public:
     // Init database.
     virtual bool Init(const LLBC_String &ip, 
                       int port, 

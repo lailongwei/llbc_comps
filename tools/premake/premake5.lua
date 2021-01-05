@@ -58,3 +58,6 @@ project "example"
 project "database"
     generate_comp_project("database")
     include_3rd_mysql("database")    
+
+project "gameapp"
+    generate_server_project("gameapp")

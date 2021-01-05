@@ -21,35 +21,23 @@
 
 #pragma once
 
-#include "IDBMgr.h"
-#include "Database.h"
-#include <memory>
-#include <map>
+#include "llbc/application/IApplication.h"
+#include "llbc/core/singleton/Singleton.h"
 
-class DBMgr : public IDBMgr
+using namespace llbc;
+
+class GameApplication : public LLBC_IApplication
 {
 public:
-    DBMgr() = default;
-    virtual ~DBMgr() = default;
+    GameApplication();
 
 public:
-    virtual bool OnInitialize() override;
-    virtual void OnDestroy() override;
-    virtual bool OnStart() override;
-    virtual void OnStop() override;
-    virtual void OnUpdate() override;
-
-public:
-    virtual void Flush() override;
-
-    virtual IDatabase *GetDatabase(const LLBC_String &dbConnName) override;
-    virtual IDatabase *GetDefaultDatabase() override;
+    virtual int OnStart(int argc, char *argv[]);
+    virtual void OnWait();
+    virtual void OnStop();
 
 private:
-    MysqlDB *CreateDatabase(const LLBC_String &ip, int port, const LLBC_String &user, const LLBC_String &passwd, const LLBC_String &dbName,
-                              int asyncConnNum);
-
-private:
-    MysqlDB *_defaultDB = nullptr;
-    std::map<LLBC_String, std::unique_ptr<MysqlDB>> _databases;
+    LLBC_IService *_gameSvc;
 };
+
+#define g_GameServer (*LLBC_Singleton<GameApplication, LLBC_DummyLock>::Instance())
