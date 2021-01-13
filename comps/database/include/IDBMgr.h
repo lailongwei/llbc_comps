@@ -33,9 +33,17 @@ public:
     virtual ~IDBMgr() = default;
 
 public:
+    // flush all async tasks and wait tasks finish.
     virtual void Flush() = 0;
 
+    // get database obj by connName.
     virtual IDatabase *GetDatabase(const LLBC_String &dbConnName) = 0;
+    // get default database obj.
     virtual IDatabase *GetDefaultDatabase() = 0;
+
+    // destroy database obj.
+    virtual void DestroyDatabase(const LLBC_String& dbConnName) = 0;
+    // create a database obj by cfg.
+    virtual IDatabase *CreateDatabase(const DatabaseParam &cfg) = 0;
 };
 

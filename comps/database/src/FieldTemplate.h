@@ -77,13 +77,13 @@ private:
 
 using UInt64Field = FieldTemplate<uint64>;
 using UIntField = FieldTemplate<uint32>;
-using USmallIntField = FieldTemplate<uint16_t>;
-using UTinyIntField = FieldTemplate<uint8_t>;
+using USmallIntField = FieldTemplate<uint16>;
+using UTinyIntField = FieldTemplate<uint8>;
 using Int64Field = FieldTemplate<sint64>;
 using IntField = FieldTemplate<int32_t>;
-using SmallIntField = FieldTemplate<int16_t>;
+using SmallIntField = FieldTemplate<sint16>;
 using DoubleField = FieldTemplate<double>;
-using TinyIntField = FieldTemplate<int8_t>;
+using TinyIntField = FieldTemplate<sint8>;
 using StringField = FieldTemplate<LLBC_String>;
 using BlobField = FieldTemplate<LLBC_String>;
 

@@ -31,6 +31,36 @@ enum class MODE
 };
 
 /**
+* Database init param.
+*/
+struct LLBC_COMP_EXPORT DatabaseParam final
+{
+    DatabaseParam(const LLBC_String& name,
+                  const LLBC_String &ip, 
+                  int port, 
+                  const LLBC_String &user, 
+                  const LLBC_String &passwd, 
+                  const LLBC_String &dbName,
+                  int asyncConnNum)
+        : _name(name)
+        , _ip(ip)
+        , _port(port)
+        , _user(user)
+        , _passwd(passwd)
+        , _dbName(dbName)
+        , _asyncConnNum(asyncConnNum)
+    {}
+
+    LLBC_String _name;
+    LLBC_String _ip;
+    int _port;
+    LLBC_String _user;
+    LLBC_String _passwd;
+    LLBC_String _dbName;
+    int _asyncConnNum;
+};
+
+/**
 * Database single record object.
 */
 class LLBC_COMP_EXPORT IRecord
@@ -68,7 +98,7 @@ public:
     virtual ~IRecordset() = default;
 
 public:
-    // Get a record from set. (not release record)
+    // Get a record from set. 
     virtual IRecord *GetRecord(uint32 idx) = 0;
 
     //Pop a record from set.(release record)
@@ -99,20 +129,11 @@ public:
     virtual ~IDatabase() = default;
 
 public:
-    // Init database.
-    virtual bool Init(const LLBC_String &name, 
-                      const LLBC_String &ip, 
-                      int port, 
-                      const LLBC_String &user, 
-                      const LLBC_String &passwd, 
-                      const LLBC_String &dbName,
-                      int asyncConnNum) = 0;
-
-    // destroy database.
-    virtual void Destroy() = 0;
-
     // flush all async query.
     virtual void Flush() = 0;
+
+    // get connection name.
+    virtual const LLBC_String &GetName() const = 0;
 
 public:
     // synchronize query.

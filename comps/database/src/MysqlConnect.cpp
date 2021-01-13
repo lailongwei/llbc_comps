@@ -28,20 +28,12 @@
 #include "llbc/core/thread/Guard.h"
 #include "llbc/core/log/Log.h"
 
-MysqlConnect::MysqlConnect(MysqlDB &db, 
-                           const LLBC_String &name, 
-                           const LLBC_String &ip, 
-                           int port, 
-                           const LLBC_String &user, 
-                           const LLBC_String &passwd,
-                           const LLBC_String &dbName)
+//mysql query warning log time.
+const static int __query_warning_time = 100;
+
+MysqlConnect::MysqlConnect(MysqlDB &db, const DatabaseParam &cfg)
     : _db(db)
-    , _name(name)
-    , _ip(ip)
-    , _port(port)
-    , _user(user)
-    , _pwd(passwd)
-    , _dbName(dbName)
+    , _cfg(cfg)
     , _lastErrorCode(0)
 {}
 
@@ -56,11 +48,18 @@ bool MysqlConnect::Connect()
     if (!hdbc)
         return false;
 
-    if (!mysql_real_connect(hdbc, _ip.c_str(), _user.c_str(), _pwd.c_str(), _dbName.c_str(), _port, nullptr, 0))
+    if (!mysql_real_connect(hdbc, 
+                            _cfg._ip.c_str(), 
+                            _cfg._user.c_str(), 
+                            _cfg._passwd.c_str(), 
+                            _cfg._dbName.c_str(), 
+                            _cfg._port, 
+                            nullptr, 
+                            0))
     {
         this->SetLastError();
         Log.e2<MysqlConnect>("could not connect to mysql. name[%s]errno[%d] errMsg[%s]",
-                             _name.c_str(),
+                             _cfg._name.c_str(),
                              GetLastErrorNo(),
                              GetLastError().c_str());
         mysql_close(hdbc);
@@ -131,7 +130,7 @@ Record *MysqlConnect::CreateRecord(MYSQL_ROW row,
 
         if (fieldInfo == nullptr)
         {
-            Log.e2<MysqlConnect>("mysql create fieldInfo failed. name[%s]", _name.c_str());
+            Log.e2<MysqlConnect>("mysql create fieldInfo failed. name[%s]", _cfg._name.c_str());
             return nullptr;
         }
 
@@ -162,11 +161,10 @@ IRecordset *MysqlConnect::Query(const char *sql, MODE mode)
     if (!res)
         return nullptr;
 
-    //函数结束自动释放MYSQL_RES
-    std::shared_ptr<void> _resGuard((void *) 0, [res](void *) { mysql_free_result(res); });
+    // auto free MYSQL_RES
+    std::shared_ptr<void> __resGuard((void *) 0, [res](void *) { mysql_free_result(res); });
     mysql_data_seek(res, 0);
 
-    // 取字段信息
     MYSQL_FIELD *dbFields = mysql_fetch_fields(res);
     if (!dbFields)
         return nullptr;
@@ -207,18 +205,27 @@ bool MysqlConnect::Query(const char *sql, MYSQL_RES **res)
 {
     if (!IsConnect())
     {
-        Log.e2<MysqlConnect>("mysql isn't connected, could not query. name[%s]", _name.c_str());
+        Log.e2<MysqlConnect>("mysql isn't connected, could not query. name[%s]", _cfg._name.c_str());
         return false;
     }
 
     try
     {
+        const sint64 startTimeInMs = LLBC_GetMilliSeconds();
+
+        std::shared_ptr<void> __timerGuard((void *) 0, [sql, startTimeInMs](void *) {
+            // query overtime log.
+            const sint64 endTimeInMs = LLBC_GetMilliSeconds();
+            if (endTimeInMs - startTimeInMs > __query_warning_time)
+                Log.w2<MysqlConnect>("mysql query overtime. sql[%s] time[%lld]", sql, endTimeInMs - startTimeInMs);
+        });
+
         int ret = mysql_real_query(_dbHandler, sql, (int) strlen(sql));
         if (ret != 0)
         {
             this->SetLastError();
             Log.e2<MysqlConnect>("mysql query fail. name[%s] sql[%s] errno[%d] errMsg[%s]", 
-                                 _name.c_str(), 
+                                 _cfg._name.c_str(), 
                                  sql, 
                                  GetLastErrorNo(), 
                                  GetLastError().c_str());
@@ -232,7 +239,7 @@ bool MysqlConnect::Query(const char *sql, MYSQL_RES **res)
     {
         this->SetLastError();
         Log.e2<MysqlConnect>("mysql query crash. name[%s] sql[%s] errno[%d] errMsg[%s]", 
-                             _name.c_str(), 
+                             _cfg._name.c_str(), 
                              sql, 
                              GetLastErrorNo(), 
                              GetLastError().c_str());
@@ -241,7 +248,6 @@ bool MysqlConnect::Query(const char *sql, MYSQL_RES **res)
     return true;
 }
 
-// 创建指定表默认记录
 IRecord *MysqlConnect::MakeDefRecord(const char *tableName)
 {
     char sql[256] = { 0 };
@@ -254,22 +260,21 @@ IRecord *MysqlConnect::MakeDefRecord(const char *tableName)
     if (!res)
     {
         Log.e2<MysqlConnect>("mysql def record res is null. name[%s] table[%s] errno[%d] errMsg[%s]", 
-                             _name.c_str(), 
+                             _cfg._name.c_str(), 
                              tableName, 
                              GetLastErrorNo(), 
                              GetLastError().c_str());
         return nullptr;
     }
 
-    //函数结束自动释放MYSQL_RES
-    std::shared_ptr<void> _resGuard((void *) 0, [res](void *) { mysql_free_result(res); });
+    // auto free MYSQL_RES
+    std::shared_ptr<void> __resGuard((void *) 0, [res](void *) { mysql_free_result(res); });
 
-    // 取字段信息
     MYSQL_FIELD *dbFields = mysql_fetch_fields(res);
     if (!dbFields)
     {
         Log.e2<MysqlConnect>("mysql def record field is null. name[%s] table[%s] errno[%d] errMsg[%s]",
-                             _name.c_str(),
+                             _cfg._name.c_str(),
                              tableName,
                              GetLastErrorNo(),
                              GetLastError().c_str());

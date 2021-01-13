@@ -39,17 +39,15 @@ class MysqlDB : public IDatabase
 public:
     MysqlDB();
 
+public:
    // Init database.
-    virtual bool Init(const LLBC_String& name,
-                      const LLBC_String &ip, 
-                      int port, 
-                      const LLBC_String &user, 
-                      const LLBC_String &passwd, 
-                      const LLBC_String &dbName,
-                      int asyncConnNum) override;
+    virtual bool Init(const DatabaseParam &cfg);
 
     // destroy database.
-    virtual void Destroy() override;
+    virtual void Destroy();
+
+    // get connection name.
+    virtual const LLBC_String &GetName() const override;
 
     // flush all async query.
     virtual void Flush() override;

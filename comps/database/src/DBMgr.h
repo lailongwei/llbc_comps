@@ -40,19 +40,21 @@ public:
     virtual void OnUpdate() override;
 
 public:
+    // flush all async tasks and wait tasks finish.
     virtual void Flush() override;
 
+    // get database obj by connName.
     virtual IDatabase *GetDatabase(const LLBC_String &dbConnName) override;
+    // get default database obj.
     virtual IDatabase *GetDefaultDatabase() override;
 
+    // destroy database obj.
+    virtual void DestroyDatabase(const LLBC_String &dbConnName) override;
+    // create a database obj by cfg.
+    virtual IDatabase *CreateDatabase(const DatabaseParam &cfg) override;
+
 private:
-    MysqlDB *CreateDatabase(const LLBC_String& name,
-                            const LLBC_String &ip, 
-                            int port, 
-                            const LLBC_String &user, 
-                            const LLBC_String &passwd, 
-                            const LLBC_String &dbName,
-                            int asyncConnNum);
+    MysqlDB *CreateMysqlDB(const DatabaseParam& cfg);
 
 private:
     MysqlDB *_defaultDB = nullptr;
