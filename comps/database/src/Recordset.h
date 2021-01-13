@@ -35,15 +35,16 @@ public:
     virtual ~Recordset() = default;
 
 public:
-    //从集合充获取一条记录(集合仍然管理Record对象内存)
+    // Get a record from set.
     virtual IRecord *GetRecord(uint32 idx) override;
 
-    //从集合从获取一条记录(集合不再管理Record对象内存)
+    // Pop a record from set.(release record)
     virtual IRecord *PopRecord(uint32 idx) override;
 
-    //获得集合记录数量
+    // Get record count.
     virtual uint32 GetSize() const override;
 
+    // Get a record ref.
     virtual IRecord &operator[](uint32 idx) override;
 
 public:

@@ -20,7 +20,6 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "DBMgr.h"
-
 #include "llbc/core/log/Log.h"
 
 bool DBMgr::OnInitialize()
@@ -45,22 +44,26 @@ bool DBMgr::OnInitialize()
         }
 
         const auto name = dbSession->GetValue<LLBC_String>("name");
-        const auto ip = dbSession->GetValue<LLBC_String>("ip");
-        const auto port = dbSession->GetValue<uint32>("port");
-        const auto user = dbSession->GetValue<LLBC_String>("user");
-        const auto pwd = dbSession->GetValue<LLBC_String>("passwd");
-        const auto db = dbSession->GetValue<LLBC_String>("db");
-        const auto connectNum = dbSession->GetValue<uint32>("connect");
-        const auto def = dbSession->GetValue<uint32>("default");
+        if (_databases.find(name) != _databases.end())
+        {
+            Log.e2<DBMgr>("Database name is repeated. name[%s]", name.c_str());
+            return false;
+        }
 
-        auto newDB = CreateDatabase(name, ip, port, user, pwd, db, connectNum);
+        auto newDB = CreateMysqlDB(DatabaseParam(name,
+                                                 dbSession->GetValue<LLBC_String>("ip"),
+                                                 dbSession->GetValue<uint32>("port"),
+                                                 dbSession->GetValue<LLBC_String>("user"),
+                                                 dbSession->GetValue<LLBC_String>("passwd"),
+                                                 dbSession->GetValue<LLBC_String>("db"),
+                                                 dbSession->GetValue<uint32>("connect")));
         if (!newDB)
         {
             Log.e2<DBMgr>("Failed to create database. name[%s]", name.c_str());
             return false;
         }
 
-        if (def > 0)
+        if (dbSession->GetValue<uint32>("default") > 0)
         {
             if (_defaultDB)
             {
@@ -68,12 +71,6 @@ bool DBMgr::OnInitialize()
                 return false;
             }
             _defaultDB = newDB;
-        }
-
-        if (_databases.find(name) != _databases.end())
-        {
-            Log.e2<DBMgr>("Database name is repeated. name[%s]", name.c_str());
-            return false;
         }
 
         _databases[name].reset(newDB);
@@ -95,16 +92,18 @@ void DBMgr::OnDestroy()
         if (db.second)
             db.second->Destroy();
     }
+    _databases.clear();
 }
 
 bool DBMgr::OnStart()
 {
+    Log.i2<DBMgr>("DBMgr OnStart.");
     return true;
 }
 
 void DBMgr::OnStop()
 {
-    // do nothing
+    Log.i2<DBMgr>("DBMgr OnStop.");
 }
 
 void DBMgr::OnUpdate()
@@ -132,17 +131,44 @@ IDatabase *DBMgr::GetDefaultDatabase()
     return _defaultDB;
 }
 
-MysqlDB *DBMgr::CreateDatabase(const LLBC_String &name, 
-                               const LLBC_String &ip, 
-                               int port, 
-                               const LLBC_String &user, 
-                               const LLBC_String &passwd,
-                               const LLBC_String &dbName,
-                               int asyncConnNum)
+void DBMgr::DestroyDatabase(const LLBC_String &dbConnName)
+{
+    auto it = _databases.find(dbConnName);
+    if (it != _databases.end())
+    {
+        Log.e2<DBMgr>("Database isn't exists. name[%s]", dbConnName.c_str());
+        return ;
+    }
+
+    it->second->Destroy();
+    _databases.erase(it);
+}
+
+IDatabase *DBMgr::CreateDatabase(const DatabaseParam &cfg)
+{
+    if (_databases.find(cfg._name) != _databases.end())
+    {
+        Log.e2<DBMgr>("Database name is repeated. name[%s]", cfg._name.c_str());
+        return nullptr;
+    }
+
+    auto newDB = CreateMysqlDB(cfg);
+    if (!newDB)
+    {
+        Log.e2<DBMgr>("Failed to create database. name[%s]", cfg._name.c_str());
+        return nullptr;
+    }
+
+    _databases[cfg._name].reset(newDB);
+    return newDB;
+}
+
+MysqlDB *DBMgr::CreateMysqlDB(const DatabaseParam &cfg)
 {
     MysqlDB *db = new MysqlDB();
-    if (!db->Init(name, ip, port, user, passwd, dbName, asyncConnNum))
+    if (!db->Init(cfg))
     {
+        Log.e2<DBMgr>("Failed to create MysqlDB. name[%s]", cfg._name.c_str());
         delete db;
         return nullptr;
     }

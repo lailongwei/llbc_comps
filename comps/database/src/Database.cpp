@@ -41,37 +41,36 @@ MysqlDB::MysqlDB()
     , _flushing(false)
 {}
 
-bool MysqlDB::Init(const LLBC_String &name, 
-                   const LLBC_String &ip, 
-                   int port, 
-                   const LLBC_String &user, 
-                   const LLBC_String &passwd,
-                   const LLBC_String &dbName,
-                   int acyncConnNum)
+const LLBC_String &MysqlDB::GetName() const
+{
+    return _name;
+}
+
+bool MysqlDB::Init(const DatabaseParam &cfg)
 {
     if (_inited)
     {
-        Log.e2<MysqlDB>("Database name[%s] already init.", name.c_str());
+        Log.e2<MysqlDB>("Database name[%s] already init.", cfg._name.c_str());
         return false;
     }
 
-    Log.i2<MysqlDB>("Init database. name[%s]", name.c_str());
+    Log.i2<MysqlDB>("Init database. name[%s]", cfg._name.c_str());
 
-    _syncConn.reset(new MysqlConnect(*this, name, ip, port, user, passwd, dbName));
+    _syncConn.reset(new MysqlConnect(*this, cfg));
     if (!_syncConn->Connect())
     {
-        Log.e2<MysqlDB>("Failed to connect to database. name[%s]", name.c_str());
+        Log.e2<MysqlDB>("Failed to connect to database. name[%s]", cfg._name.c_str());
         return false;
     }
 
-    _asyncConnNum = std::max<int>(acyncConnNum, 1);
+    _asyncConnNum = std::max<int>(cfg._asyncConnNum, 1);
 
     for (uint32 i = 0; i < _asyncConnNum; ++i)
     {
-        std::unique_ptr<MysqlConnect> conn(new MysqlConnect(*this, name, ip, port, user, passwd, dbName));
+        std::unique_ptr<MysqlConnect> conn(new MysqlConnect(*this, cfg));
         if (!conn->Connect())
         {
-            Log.e2<MysqlDB>("Failed to connect to database. name[%s]", name.c_str());
+            Log.e2<MysqlDB>("Failed to connect to database. name[%s]", cfg._name.c_str());
             return false;
         }
 
@@ -91,7 +90,7 @@ bool MysqlDB::Init(const LLBC_String &name,
 
     _asyncThreadId = std::this_thread::get_id();
 
-    _name = name;
+    _name = cfg._name;
     _inited = true;
     return true;
 }

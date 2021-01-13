@@ -22,6 +22,7 @@
 #pragma once
 
 #include <mysql/mysql.h>
+#include "IDB.h"
 
 #include "llbc/common/BasicDataType.h"
 #include "llbc/common/StringDataType.h"
@@ -37,13 +38,7 @@ enum class MODE;
 class MysqlConnect
 {
 public:
-    MysqlConnect(MysqlDB &db, 
-                 const LLBC_String& name, 
-                 const LLBC_String &ip, 
-                 int port, 
-                 const LLBC_String &user, 
-                 const LLBC_String &passwd, 
-                 const LLBC_String &dbName);
+    MysqlConnect(MysqlDB &db, const DatabaseParam &cfg);
     ~MysqlConnect();
 
 public:
@@ -85,13 +80,7 @@ private:
 
 private:
     MysqlDB &_db;
-
-    LLBC_String _name;
-    LLBC_String _ip;
-    sint32 _port;
-    LLBC_String _user;
-    LLBC_String _pwd;
-    LLBC_String _dbName;
+    DatabaseParam _cfg;
 
     sint32 _lastErrorCode;
     LLBC_String _lastError;
