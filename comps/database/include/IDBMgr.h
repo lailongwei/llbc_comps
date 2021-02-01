@@ -24,11 +24,11 @@
 #include "IDB.h"
 #include "comp_com/Common.h"
 
-class LLBC_COMP_EXPORT IDBMgr : public LLBC_IFacade
+class LLBC_COMP_EXPORT IDBMgr : public LLBC_IComponent
 {
 public:
     IDBMgr()
-        : LLBC_IFacade(LLBC_FacadeEvents::DefaultEvents | LLBC_FacadeEvents::OnUpdate | LLBC_FacadeEvents::OnInitialize)
+        : LLBC_IComponent(LLBC_ComponentEvents::DefaultEvents | LLBC_ComponentEvents::OnUpdate | LLBC_ComponentEvents::OnInitialize)
     {}
     virtual ~IDBMgr() = default;
 

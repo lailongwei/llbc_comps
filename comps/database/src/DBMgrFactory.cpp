@@ -22,7 +22,7 @@
 #include "DBMgrFactory.h"
 #include "DBMgr.h"
 
-LLBC_IFacade *DBMgrFactory::Create() const
+LLBC_IComponent *DBMgrFactory::Create() const
 {
     return new DBMgr();
 }

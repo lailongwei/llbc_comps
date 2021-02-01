@@ -23,11 +23,11 @@
 
 #include "comp_com/Common.h"
 
-class LogicComp : public LLBC_IFacade
+class LogicComp : public LLBC_IComponent
 {
 public:
     LogicComp()
-        : LLBC_IFacade(LLBC_FacadeEvents::DefaultEvents | LLBC_FacadeEvents::OnUpdate)
+        : LLBC_IComponent(LLBC_ComponentEvents::DefaultEvents | LLBC_ComponentEvents::OnUpdate)
     {}
     virtual ~LogicComp() = default;
 

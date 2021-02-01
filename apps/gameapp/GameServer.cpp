@@ -37,8 +37,8 @@ int GameApplication::OnStart(int argc, char *argv[])
     _gameSvc = LLBC_IService::Create(LLBC_IService::Normal, _name);
 
     // register component.
-    _gameSvc->RegisterFacade<DBMgrFactory>();
-    _gameSvc->RegisterFacade<LogicCompFactory>();
+    _gameSvc->RegisterComponent<DBMgrFactory>();
+    _gameSvc->RegisterComponent<LogicCompFactory>();
 
     _gameSvc->SetFPS(100);
     if (_gameSvc->Start(4) != LLBC_OK)
