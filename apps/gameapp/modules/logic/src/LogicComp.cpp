@@ -46,7 +46,7 @@ void LogicComp::OnUpdate() {}
 
 void LogicComp::DatabaseTest()
 {
-    auto dbMgr = GetService()->GetFacade<IDBMgr>(ComponentName::DBMgr);
+    auto dbMgr = GetService()->GetComponent<IDBMgr>(ComponentName::DBMgr);
     auto defDB = dbMgr->GetDefaultDatabase();
 
     const char *createTableSql =

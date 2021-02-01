@@ -40,12 +40,12 @@ int ExampleComp::Call_Foo(const LLBC_Variant &arg, LLBC_Variant &ret)
     return 0;
 }
 
-LLBC_IFacade *ExampleCompFactory::Create() const
+LLBC_IComponent *ExampleCompFactory::Create() const
 {
     return LLBC_New(ExampleComp);
 }
 
-void *llbc_create_facade_ExampleComp()
+void *llbc_create_comp_ExampleComp()
 {
     return ExampleCompFactory().Create();
 }

@@ -23,9 +23,9 @@
 
 #include "comp_com/Common.h"
 
-class LLBC_COMP_EXPORT DBMgrFactory : public LLBC_IFacadeFactory
+class LLBC_COMP_EXPORT DBMgrFactory : public LLBC_IComponentFactory
 {
 public:
-    virtual LLBC_IFacade *Create() const;
+    virtual LLBC_IComponent *Create() const;
 };
 

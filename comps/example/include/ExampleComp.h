@@ -26,7 +26,7 @@
 /**
  * \brief The example component class define.
  */
-class LLBC_COMP_EXPORT ExampleComp : public LLBC_IFacade
+class LLBC_COMP_EXPORT ExampleComp : public LLBC_IComponent
 {
 public:
     virtual bool OnInitialize();
@@ -41,13 +41,13 @@ public:
 /**
  * \brief The example component factory class define.
  */
-class LLBC_COMP_EXPORT ExampleCompFactory : public LLBC_IFacadeFactory
+class LLBC_COMP_EXPORT ExampleCompFactory : public LLBC_IComponentFactory
 {
 public:
-    virtual LLBC_IFacade *Create() const;
+    virtual LLBC_IComponent *Create() const;
 };
 
 /**
- * \brief The facade dynamic create function define.
+ * \brief The component dynamic create function define.
  */
-LLBC_EXTERN LLBC_COMP_EXPORT void *llbc_create_facade_ExampleComp();
+LLBC_EXTERN LLBC_COMP_EXPORT void *llbc_create_comp_ExampleComp();

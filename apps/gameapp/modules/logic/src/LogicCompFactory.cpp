@@ -21,7 +21,7 @@
 
 #include "modules/logic/Logic.h"
 
-LLBC_IFacade *LogicCompFactory::Create() const
+LLBC_IComponent *LogicCompFactory::Create() const
 {
     return new LogicComp();
 }

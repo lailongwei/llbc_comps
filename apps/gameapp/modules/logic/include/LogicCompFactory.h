@@ -23,8 +23,8 @@
 
 #include "comp_com/Common.h"
 
-class LogicCompFactory : public LLBC_IFacadeFactory
+class LogicCompFactory : public LLBC_IComponentFactory
 {
 public:
-    virtual LLBC_IFacade *Create() const;
+    virtual LLBC_IComponent *Create() const;
 };
