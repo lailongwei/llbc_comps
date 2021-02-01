@@ -49,6 +49,9 @@ private:
     DataType _val = 0;
 };
 
+/**
+ * string template specializations.
+ */
 template <>
 class FieldTemplate<LLBC_String> : public BaseField
 {
@@ -80,7 +83,7 @@ using UIntField = FieldTemplate<uint32>;
 using USmallIntField = FieldTemplate<uint16>;
 using UTinyIntField = FieldTemplate<uint8>;
 using Int64Field = FieldTemplate<sint64>;
-using IntField = FieldTemplate<int32_t>;
+using IntField = FieldTemplate<sint32>;
 using SmallIntField = FieldTemplate<sint16>;
 using DoubleField = FieldTemplate<double>;
 using TinyIntField = FieldTemplate<sint8>;

@@ -32,7 +32,7 @@ bool DBMgr::OnInitialize()
         return true;
     }
 
-    for (int i = 1; i<= dbNum; ++i)
+    for (uint32 i = 1; i <= dbNum; ++i)
     {
         LLBC_String cfgName;
         cfgName.format("Database%d", i);

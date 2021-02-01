@@ -100,7 +100,7 @@ bool AsyncTaskQueue::Empty()
     return _count == 0;
 }
 
-int32_t AsyncTaskQueue::Size()
+sint32 AsyncTaskQueue::Size()
 {
     return _count;
 }

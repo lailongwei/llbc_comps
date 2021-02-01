@@ -37,7 +37,7 @@ const static int __DefaultNum2StrLen = 20;
 
 bool SqlUtil::BuildCondition(MYSQL *handle, Record *record, LLBC_String &cond)
 {
-    int32_t keyIdx = record->GetAutoIncIdx();
+    sint32 keyIdx = record->GetAutoIncIdx();
     if (keyIdx < 0)
         keyIdx = record->GetKeyIdx();
 
@@ -143,7 +143,7 @@ void SqlUtil::BuildFormatSql(MYSQL *handle, const BaseField *field, char *format
 
 bool SqlUtil::BuildOperation(MYSQL *handle, Record *record, LLBC_String &cond)
 {
-    int32_t keyIdx = record->GetAutoIncIdx();
+    sint32 keyIdx = record->GetAutoIncIdx();
     if (keyIdx < 0)
         keyIdx = record->GetKeyIdx();
 
@@ -151,10 +151,10 @@ bool SqlUtil::BuildOperation(MYSQL *handle, Record *record, LLBC_String &cond)
     if (keyIdx < 0 && keyIdx >= fieldNUm)
         return false;
 
-    int32_t maxFeildStrLen = 0;
+    sint32 maxFeildStrLen = 0;
 
     std::list<const BaseField *> updateFields;
-    for (int32_t idx = 0; idx < fieldNUm; ++idx)
+    for (sint32 idx = 0; idx < fieldNUm; ++idx)
     {
         const BaseField *field = record->GetField(idx);
         if (!field->IsChanged())
