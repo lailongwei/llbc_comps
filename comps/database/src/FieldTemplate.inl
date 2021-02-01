@@ -54,13 +54,13 @@ bool FieldTemplate<DataType>::SetValue(const char *value, uint32 len)
 template <typename DataType>
 sint64 FieldTemplate<DataType>::GetInt() const
 {
-    return _val;
+    return static_cast<sint64>(_val);
 }
 
 template <typename DataType>
 double FieldTemplate<DataType>::GetDouble() const
 {
-    return _val;
+    return static_cast<double>(_val);
 }
 
 template <typename DataType>
@@ -74,14 +74,14 @@ LLBC_String &FieldTemplate<DataType>::GetStr() const
 template <typename DataType>
 void FieldTemplate<DataType>::SetInt(sint64 val)
 {
-    _val = val;
+    _val = static_cast<DataType>(val);
     TagChanged(true);
 }
 
 template <typename DataType>
 void FieldTemplate<DataType>::SetDouble(double val)
 {
-    _val = val;
+    _val = static_cast<DataType>(val);
     TagChanged(true);
 }
 
@@ -98,7 +98,7 @@ void FieldTemplate<DataType>::SetBlob(const char *val, uint32 len)
 }
 
 
-bool FieldTemplate<LLBC_String>::SetValue(const char *value, uint32 len)
+inline bool FieldTemplate<LLBC_String>::SetValue(const char *value, uint32 len)
 {
     switch (_info.type)
     {
@@ -119,40 +119,40 @@ bool FieldTemplate<LLBC_String>::SetValue(const char *value, uint32 len)
     return true;
 }
 
-sint64 FieldTemplate<LLBC_String>::GetInt() const
+inline sint64 FieldTemplate<LLBC_String>::GetInt() const
 {
     assert(false);
     return 0;
 }
 
-double FieldTemplate<LLBC_String>::GetDouble() const
+inline double FieldTemplate<LLBC_String>::GetDouble() const
 {
     assert(false);
     return 0;
 }
 
-const LLBC_String &FieldTemplate<LLBC_String>::GetStr() const
+inline const LLBC_String &FieldTemplate<LLBC_String>::GetStr() const
 {
     return _val;
 }
 
-void FieldTemplate<LLBC_String>::SetInt(sint64 val)
+inline void FieldTemplate<LLBC_String>::SetInt(sint64 val)
 {
     assert(false);
 }
 
-void FieldTemplate<LLBC_String>::SetDouble(double val)
+inline void FieldTemplate<LLBC_String>::SetDouble(double val)
 {
     assert(false);
 }
 
-void FieldTemplate<LLBC_String>::SetStr(const char *val)
+inline void FieldTemplate<LLBC_String>::SetStr(const char *val)
 {
     _val = val;
     TagChanged(true);
 }
 
-void FieldTemplate<LLBC_String>::SetBlob(const char *val, uint32 len)
+inline void FieldTemplate<LLBC_String>::SetBlob(const char *val, uint32 len)
 {
     _val.assign(val, len);
     TagChanged(true);

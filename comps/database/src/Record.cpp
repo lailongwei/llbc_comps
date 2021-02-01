@@ -100,22 +100,22 @@ bool Record::IsChanged(uint32 idx) const
     return _fields[idx]->IsChanged();
 }
 
-int32_t Record::GetKeyIdx() const
+sint32 Record::GetKeyIdx() const
 {
     return _keyIdx;
 }
 
-void Record::SetKeyIdx(int32_t idx)
+void Record::SetKeyIdx(sint32 idx)
 {
     _keyIdx = idx;
 }
 
-int32_t Record::GetAutoIncIdx() const
+sint32 Record::GetAutoIncIdx() const
 {
     return _autoIncIdx;
 }
 
-void Record::SetAutoIncIdx(int32_t idx)
+void Record::SetAutoIncIdx(sint32 idx)
 {
     _autoIncIdx = idx;
 }

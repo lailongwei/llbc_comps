@@ -33,7 +33,7 @@ enum class MODE
 /**
 * Database init param.
 */
-struct LLBC_COMP_EXPORT DatabaseParam final
+struct DatabaseParam final
 {
     DatabaseParam(const LLBC_String& name,
                   const LLBC_String &ip, 

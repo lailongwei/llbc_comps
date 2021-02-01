@@ -20,6 +20,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
+#include "comp_com/Common.h"
 
 #include <mutex>
 #include <condition_variable>
@@ -45,7 +46,7 @@ public:
     void TimePopAll(std::vector<AsyncTask *> &tasks, int interval);
 
     bool Empty();
-    int32_t Size();
+    sint32 Size();
 
 private:
     std::mutex _lock;

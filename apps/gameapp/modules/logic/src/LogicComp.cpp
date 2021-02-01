@@ -82,7 +82,7 @@ void LogicComp::DatabaseTest()
     // const LLBC_String blob("this blob !!!");
     const LLBC_String varstr("this is varstr_type!!!");
     const LLBC_String str("this is str_type!!!");
-    const float ft = 3.1415926;
+    const float ft = 3.14;
     const double dt = 3.1415926;
     const LLBC_String datet("2020-01-01 12:00:00");
 
@@ -127,8 +127,8 @@ void LogicComp::DatabaseTest()
     llbcRec.SetStr("str_type", "new this is str_type!!!");
     llbcRec.SetInt("tiny_type", 2);
     llbcRec.SetBlob("blob_type", blob.c_str(), blob.size());
-    llbcRec.SetInt("float_type", ft);
-    llbcRec.SetInt("double_type", dt);
+    llbcRec.SetDouble("float_type", ft);
+    llbcRec.SetDouble("double_type", dt);
     llbcRec.SetStr("datetime_type", datet.c_str());
     ASSERT(RecordManipulator::Update(defDB, &llbcRec));
 
@@ -137,7 +137,7 @@ void LogicComp::DatabaseTest()
     defDB->QueryAsync(2, "select * from llbc", MODE::MODE_READ, [](IRecordset *recSet) {
         ASSERT(recSet);
         const auto count = recSet->GetSize();
-        for (int i = 0; i < count; ++i)
+        for (uint32 i = 0; i < count; ++i)
         {
             auto &llbcRec = (*recSet)[i];
             auto id = llbcRec.GetInt("id");

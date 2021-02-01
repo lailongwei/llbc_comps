@@ -64,11 +64,11 @@ public:
     void ClsEditFlag(void);
     bool IsChanged(uint32 idx) const;
     //主键
-    int32_t GetKeyIdx() const;
-    void SetKeyIdx(int32_t idx);
+    sint32 GetKeyIdx() const;
+    void SetKeyIdx(sint32 idx);
     //自增Id
-    int32_t GetAutoIncIdx() const;
-    void SetAutoIncIdx(int32_t idx);
+    sint32 GetAutoIncIdx() const;
+    void SetAutoIncIdx(sint32 idx);
 
     const LLBC_String &GetTableName() const;
     const BaseField *GetField(uint32 idx) const;
@@ -82,7 +82,7 @@ private:
     std::vector<std::unique_ptr<BaseField>> _fields;
     std::map<LLBC_String, int> _fieldName2Idx;
 
-    int32_t _keyIdx = -1;
-    int32_t _autoIncIdx = -1;  //自增Id位置
+    sint32 _keyIdx = -1;
+    sint32 _autoIncIdx = -1;  //自增Id位置
 };
 
